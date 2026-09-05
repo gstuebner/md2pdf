@@ -78,9 +78,8 @@ overridden:
 make build VERSION=2.4.0
 ```
 
-Without it, `md2pdf --version` reports `dev`, because this repository isn't
-a Git repository and the version can't be derived automatically from
-history.
+Without it, `md2pdf --version` reports `dev`. The build does not derive the
+version from Git history, so release builds pass it explicitly.
 
 Other targets: `make test` (Go tests), `make vet` (`go vet`), `make fmt`
 (checks with `gofmt -l` whether any files are unformatted), `make clean`

@@ -80,9 +80,8 @@ Das erzeugt `dist/md2pdf_linux_amd64`, `dist/md2pdf_linux_arm64` und
 make build VERSION=2.4.0
 ```
 
-Ohne Angabe steht in `md2pdf --version` `dev`, da dieses Repository kein
-Git-Repository ist und sich die Version daher nicht automatisch aus dem
-Verlauf ableiten lässt.
+Ohne Angabe steht in `md2pdf --version` `dev`. Der Build leitet die Version
+nicht aus dem Git-Verlauf ab, Release-Builds geben sie deshalb ausdrücklich mit.
 
 Weitere Ziele: `make test` (Go-Tests), `make vet` (`go vet`), `make fmt`
 (prüft mit `gofmt -l`, ob Dateien ungeformt sind), `make clean` (entfernt
