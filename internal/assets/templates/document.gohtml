@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="{{with .Doc.Meta.Lang}}{{.}}{{else}}de{{end}}">
+<head>
+<meta charset="utf-8">
+<title>{{with .Doc.Meta.Title}}{{.}}{{else}}Dokument{{end}}</title>
+<style>{{.CSS}}</style>
+</head>
+<body class="{{if .NumberHeadings}}numbered {{end}}{{if .ChapterPages}}chapters{{end}}">
+
+{{if .ShowCover}}
+<section class="cover">
+  <div class="cover-head">
+    <div class="cover-kicker">{{with .Doc.Meta.Kicker}}{{.}}{{else}}Dokumentation{{end}}</div>
+    {{with .Doc.Meta.Logo}}<img class="cover-logo" src="{{.}}" alt="">{{end}}
+  </div>
+
+  <div class="cover-body">
+    <h1 class="cover-title">{{with .Doc.Meta.Title}}{{.}}{{else}}Ohne Titel{{end}}</h1>
+    {{with .Doc.Meta.Subtitle}}<p class="cover-subtitle">{{.}}</p>{{end}}
+  </div>
+
+  <div class="cover-foot">
+    <dl class="cover-meta">
+      {{with .Doc.Meta.Version}}<div><dt>Version</dt><dd>{{.}}</dd></div>{{end}}
+      {{with .Doc.Meta.Date}}<div><dt>Stand</dt><dd>{{.}}</dd></div>{{end}}
+      {{with .Doc.Meta.Author}}<div><dt>Autor</dt><dd>{{.}}</dd></div>{{end}}
+      {{with .Doc.Meta.Company}}<div><dt>Herausgeber</dt><dd>{{.}}</dd></div>{{end}}
+    </dl>
+  </div>
+</section>
+{{end}}
+
+{{if and .ShowTOC .Doc.TOC}}
+<nav class="toc">
+  <h2 class="toc-heading">{{.TOCTitle}}</h2>
+  <ul class="toc-list">
+    {{range .Doc.TOC}}<li class="toc-l{{.Level}}"><a href="#{{.ID}}">{{.Text}}</a></li>
+    {{end}}
+  </ul>
+</nav>
+{{end}}
+
+<main class="doc">
+{{.Doc.BodyHTML}}
+</main>
+
+{{if .Doc.HasMermaid}}
+<script>{{.MermaidJS}}</script>
+<script>
+(function () {
+  var cs = getComputedStyle(document.documentElement);
+  function v(name, fallback) {
+    var value = cs.getPropertyValue(name);
+    return value ? value.trim() : fallback;
+  }
+  var accent  = v('--accent', '#2563eb');
+  var soft    = v('--accent-soft', '#eff6ff');
+  var ink     = v('--ink', '#0f172a');
+  var muted   = v('--ink-muted', '#475569');
+  var rule    = v('--rule-strong', '#cbd5e1');
+  var surface = v('--surface', '#f8fafc');
+  var page    = v('--page', '#ffffff');
+
+  mermaid.initialize({
+    startOnLoad: false,
+    securityLevel: 'strict',
+    theme: 'base',
+    fontFamily: v('--font-body', 'Inter, sans-serif'),
+    flowchart: { curve: 'basis', useMaxWidth: true, htmlLabels: false },
+    sequence: { useMaxWidth: true },
+    themeVariables: {
+      fontSize: '13px',
+      background: page,
+      primaryColor: soft,
+      primaryTextColor: ink,
+      primaryBorderColor: accent,
+      secondaryColor: surface,
+      secondaryTextColor: ink,
+      secondaryBorderColor: rule,
+      tertiaryColor: page,
+      tertiaryBorderColor: rule,
+      mainBkg: soft,
+      nodeBorder: accent,
+      nodeTextColor: ink,
+      lineColor: muted,
+      textColor: ink,
+      edgeLabelBackground: page,
+      clusterBkg: surface,
+      clusterBorder: rule,
+      titleColor: ink,
+      noteBkgColor: surface,
+      noteBorderColor: rule,
+      noteTextColor: ink
+    }
+  });
+})();
+</script>
+{{end}}
+
+<script>
+window.__md2pdfReady = false;
+(function () {
+  function finish() { window.__md2pdfReady = true; }
+
+  function diagrams() {
+    if (!window.mermaid) return Promise.resolve();
+    return window.mermaid.run({ querySelector: 'pre.mermaid' })
+      .catch(function (err) { console.error('md2pdf: mermaid failed:', err); });
+  }
+
+  function fonts() {
+    return (document.fonts && document.fonts.ready) ? document.fonts.ready : Promise.resolve();
+  }
+
+  // Zwei Frames Puffer, damit Blink das Layout nach dem SVG-Einbau abgeschlossen hat.
+  function settle() {
+    return new Promise(function (resolve) {
+      requestAnimationFrame(function () { requestAnimationFrame(resolve); });
+    });
+  }
+
+  diagrams().then(fonts).then(settle).then(finish).catch(finish);
+})();
+</script>
+
+</body>
+</html>

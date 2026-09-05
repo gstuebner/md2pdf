@@ -1,0 +1,7 @@
+dist/
+*.pdf
+.probe-*.html
+
+# Arbeitsdokumente, bleiben lokal
+prompt.md
+PLAN_GEMINI.md

@@ -1,0 +1,16 @@
+md2pdf bündelt Komponenten Dritter. Deren Lizenztexte liegen jeweils daneben.
+
+Inter
+  SIL Open Font License 1.1
+  internal/assets/fonts/OFL-Inter.txt
+  https://github.com/rsms/inter
+
+JetBrains Mono
+  SIL Open Font License 1.1
+  internal/assets/fonts/OFL-JetBrainsMono.txt
+  https://github.com/JetBrains/JetBrainsMono
+
+Mermaid
+  MIT License
+  internal/assets/vendor/LICENSE-mermaid.txt
+  https://github.com/mermaid-js/mermaid

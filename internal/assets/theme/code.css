@@ -1,0 +1,66 @@
+/* md2pdf — Syntaxfarben fuer Chroma (Formatter mit WithClasses(true)).
+   Auf Papier abgestimmt: gesaettigte, dunkle Toene auf hellem Grund, damit die
+   Unterscheidung auch im Graustufendruck ueber die Helligkeit noch traegt. */
+
+:root {
+  --code-ink:     #1f2430;
+  --code-comment: #6b7785;
+  --code-keyword: #b91c4c;
+  --code-string:  #0a3069;
+  --code-number:  #0550ae;
+  --code-func:    #7c3aed;
+  --code-type:    #0369a1;
+  --code-var:     #9a3412;
+  --code-punct:   #475569;
+  --code-error:   #b91c1c;
+}
+
+.chroma { color: var(--code-ink); background: none; }
+.chroma .line, .chroma .cl { display: inline; }
+
+/* Kommentare */
+.chroma :is(.c, .ch, .cm, .c1, .cs) { color: var(--code-comment); font-style: italic; }
+.chroma :is(.cp, .cpf) { color: var(--code-comment); }
+
+/* Schluesselwoerter */
+.chroma :is(.k, .kn, .kp, .kr) { color: var(--code-keyword); }
+.chroma :is(.kc, .kd)          { color: var(--code-keyword); font-weight: 600; }
+.chroma .kt                    { color: var(--code-type); }
+
+/* Namen */
+.chroma :is(.nf, .fm)                    { color: var(--code-func); }
+.chroma :is(.nc, .nn, .ne, .nt)          { color: var(--code-type); }
+.chroma :is(.nb, .bp, .no, .py)          { color: var(--code-number); }
+.chroma :is(.nv, .vc, .vg, .vi, .vm)     { color: var(--code-var); }
+.chroma .na                              { color: var(--code-number); }
+.chroma .nd                              { color: var(--code-var); font-weight: 600; }
+.chroma :is(.n, .nx, .nl, .ni)           { color: var(--code-ink); }
+
+/* Literale */
+.chroma :is(.s, .sa, .sb, .sc, .dl, .sd, .s2, .sh, .si, .sx, .s1, .ss) { color: var(--code-string); }
+.chroma :is(.se, .sr) { color: var(--code-var); }
+.chroma :is(.m, .mb, .mf, .mh, .mi, .mo, .il, .l, .ld) { color: var(--code-number); }
+
+/* Operatoren und Interpunktion */
+.chroma .o  { color: var(--code-keyword); }
+.chroma .ow { color: var(--code-keyword); font-weight: 600; }
+.chroma .p  { color: var(--code-punct); }
+.chroma .w  { color: inherit; }
+
+/* Generisch (Diffs, Terminal-Ausgabe) */
+.chroma .gd { color: #7f1d1d; background: #fdeced; display: inline-block; width: 100%; }
+.chroma .gi { color: #14532d; background: #e8f7ec; display: inline-block; width: 100%; }
+.chroma .gu { color: var(--code-comment); font-weight: 600; }
+.chroma .gh { color: var(--code-ink);     font-weight: 600; }
+.chroma .gp { color: var(--code-comment); }
+.chroma .ge { font-style: italic; }
+.chroma .gs { font-weight: 600; }
+.chroma :is(.gr, .gt) { color: var(--code-error); }
+.chroma .go { color: var(--code-comment); }
+.chroma .gl { text-decoration: underline; }
+
+.chroma .err { color: var(--code-error); }
+
+/* Zeilennummern, falls sie jemals eingeschaltet werden */
+.chroma :is(.ln, .lnt) { color: var(--code-comment); user-select: none; padding-right: 8pt; }
+.chroma .hl { background: #fff8c5; display: inline-block; width: 100%; }

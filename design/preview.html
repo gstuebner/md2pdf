@@ -1,0 +1,367 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Aurora Desk — md2pdf Designvorschau</title>
+<link rel="stylesheet" href="../internal/assets/theme/fonts.css">
+<link rel="stylesheet" href="../internal/assets/theme/default.css">
+<link rel="stylesheet" href="../internal/assets/theme/code.css">
+</head>
+<body class="numbered">
+
+<section class="cover">
+  <div class="cover-head">
+    <div class="cover-kicker">Handbuch</div>
+  </div>
+  <div class="cover-body">
+    <h1 class="cover-title">Aurora Desk</h1>
+    <p class="cover-subtitle">Anwenderhandbuch für die Arbeitsplatzverwaltung</p>
+  </div>
+  <div class="cover-foot">
+    <dl class="cover-meta">
+      <div><dt>Version</dt><dd>2.4.0</dd></div>
+      <div><dt>Stand</dt><dd>05.09.2026</dd></div>
+      <div><dt>Autor</dt><dd>Gregor Stüber</dd></div>
+      <div><dt>Herausgeber</dt><dd>Beispiel GmbH</dd></div>
+    </dl>
+  </div>
+</section>
+
+<nav class="toc">
+  <h2 class="toc-heading">Inhalt</h2>
+  <ul class="toc-list">
+    <li class="toc-l2"><a href="#einfuehrung">Einführung</a></li>
+    <li class="toc-l3"><a href="#systemvoraussetzungen">Systemvoraussetzungen</a></li>
+    <li class="toc-l3"><a href="#aufbau-der-anwendung">Aufbau der Anwendung</a></li>
+    <li class="toc-l2"><a href="#installation">Installation</a></li>
+    <li class="toc-l3"><a href="#paket-beziehen">Paket beziehen</a></li>
+    <li class="toc-l3"><a href="#konfiguration">Konfiguration</a></li>
+    <li class="toc-l3"><a href="#erststart">Erststart</a></li>
+    <li class="toc-l2"><a href="#taegliche-arbeit">Tägliche Arbeit</a></li>
+    <li class="toc-l3"><a href="#arbeitsplatz-buchen">Arbeitsplatz buchen</a></li>
+    <li class="toc-l3"><a href="#buchung-stornieren">Buchung stornieren</a></li>
+    <li class="toc-l2"><a href="#automatisierung">Automatisierung</a></li>
+    <li class="toc-l3"><a href="#kommandozeile">Kommandozeile</a></li>
+    <li class="toc-l3"><a href="#api-zugriff">API-Zugriff</a></li>
+    <li class="toc-l2"><a href="#fehlerbehebung">Fehlerbehebung</a></li>
+    <li class="toc-l3"><a href="#anmeldung-schlaegt-fehl">Anmeldung schlägt fehl</a></li>
+    <li class="toc-l3"><a href="#bekannte-meldungen">Bekannte Meldungen</a></li>
+  </ul>
+</nav>
+
+<main class="doc">
+
+<h2 id="einfuehrung">Einführung</h2>
+
+<p>Aurora Desk verwaltet Arbeitsplätze, Buchungen und Ausstattung an mehreren Standorten.
+Dieses Handbuch beschreibt die tägliche Arbeit mit der Weboberfläche sowie die
+Administration über die Kommandozeile. Es richtet sich an Anwenderinnen und Anwender
+ohne Vorkenntnisse und an Administratoren, die Aurora Desk betreiben.</p>
+
+<p>Begriffe, die in der Oberfläche erscheinen, sind im Text <strong>fett</strong> gesetzt.
+Eingaben, Dateinamen und Kommandos erscheinen als <code>Festbreitenschrift</code>.
+Weiterführende Hinweise stehen in <em>Randbemerkungen</em><sup id="fnref:1"><a href="#fn:1">1</a></sup>.</p>
+
+<div class="callout callout-note">
+  <p class="callout-title">Hinweis</p>
+  <div class="callout-body"><p>Dieses Handbuch bezieht sich auf Version 2.4. Ältere Installationen finden die passende Fassung im Archiv unter <em>Hilfe → Dokumentation</em>.</p></div>
+</div>
+
+<h3 id="systemvoraussetzungen">Systemvoraussetzungen</h3>
+
+<table>
+<thead><tr><th>Komponente</th><th>Minimum</th><th>Empfohlen</th></tr></thead>
+<tbody>
+<tr><td>Browser</td><td>Firefox 120, Chrome 120</td><td>jeweils aktuelle Version</td></tr>
+<tr><td>Bildschirm</td><td>1280 × 720</td><td>1920 × 1080 oder größer</td></tr>
+<tr><td>Netzwerk</td><td>2 Mbit/s</td><td>10 Mbit/s</td></tr>
+<tr><td>Serverseitig</td><td>2 vCPU, 4 GB RAM</td><td>4 vCPU, 8 GB RAM, SSD</td></tr>
+<tr><td>Datenbank</td><td>PostgreSQL 14</td><td>PostgreSQL 16</td></tr>
+</tbody>
+</table>
+
+<h3 id="aufbau-der-anwendung">Aufbau der Anwendung</h3>
+
+<p>Aurora Desk besteht aus drei Diensten, die unabhängig voneinander skaliert werden können.</p>
+
+<pre class="mermaid">flowchart LR
+    B[Browser] --&gt; G[API-Gateway]
+    G --&gt; A[Buchungsdienst]
+    G --&gt; I[Inventardienst]
+    A --&gt; D[(PostgreSQL)]
+    I --&gt; D
+    A --&gt; Q[/Benachrichtigungen/]</pre>
+
+<h2 id="installation">Installation</h2>
+
+<h3 id="paket-beziehen">Paket beziehen</h3>
+
+<p>Lade das passende Archiv von der Release-Seite und prüfe die Signatur, bevor du es entpackst.</p>
+
+<div class="codeblock" data-lang="bash" data-lines="4"><pre class="chroma"><code><span class="line"><span class="cl">curl -LO https://example.com/aurora/aurora-desk-2.4.0-linux-amd64.tar.gz
+</span></span><span class="line"><span class="cl">curl -LO https://example.com/aurora/aurora-desk-2.4.0-linux-amd64.tar.gz.sha256
+</span></span><span class="line"><span class="cl">sha256sum -c aurora-desk-2.4.0-linux-amd64.tar.gz.sha256
+</span></span><span class="line"><span class="cl">tar xzf aurora-desk-2.4.0-linux-amd64.tar.gz
+</span></span></code></pre></div>
+
+<div class="callout callout-warning">
+  <p class="callout-title">Warnung</p>
+  <div class="callout-body"><p>Entpacke das Archiv niemals in ein Verzeichnis, das bereits eine ältere Installation enthält. Vorhandene Konfigurationsdateien werden sonst überschrieben.</p></div>
+</div>
+
+<h3 id="konfiguration">Konfiguration</h3>
+
+<p>Die Konfiguration liegt als YAML-Datei unter <code>/etc/aurora/config.yaml</code>.</p>
+
+<div class="codeblock" data-lang="yaml" data-lines="12"><pre class="chroma"><code><span class="line"><span class="cl"><span class="nt">server</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">listen</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;0.0.0.0:8080&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">base_url</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;https://desk.example.com&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="nt">database</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">dsn</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;postgres://aurora@localhost:5432/aurora?sslmode=require&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">max_connections</span><span class="p">:</span><span class="w"> </span><span class="m">25</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="nt">booking</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="c"># Wie weit im Voraus gebucht werden darf.</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">horizon_days</span><span class="p">:</span><span class="w"> </span><span class="m">90</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">allow_overlap</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w">
+</span></span></span></code></pre></div>
+
+<p>Die wichtigsten Schlüssel im Überblick:</p>
+
+<dl>
+<dt>Server</dt>
+<dd>Netzwerkbindung und die nach außen sichtbare Basis-URL. Die Basis-URL landet in Einladungsmails und muss von außen erreichbar sein.</dd>
+<dt>Database</dt>
+<dd>Verbindungszeichenkette im DSN-Format. Für den Produktivbetrieb ist <code>sslmode=require</code> verpflichtend.</dd>
+<dt>Booking</dt>
+<dd>Fachliche Regeln für Buchungen, insbesondere der Buchungshorizont.</dd>
+</dl>
+
+<div class="callout callout-important">
+  <p class="callout-title">Wichtig</p>
+  <div class="callout-body"><p>Nach jeder Änderung an <code>config.yaml</code> muss der Dienst neu geladen werden: <code>systemctl reload aurora-desk</code>. Ein Neustart ist nicht nötig.</p></div>
+</div>
+
+<h3 id="erststart">Erststart</h3>
+
+<ol>
+<li>Datenbankschema anlegen: <code>aurora-desk migrate up</code></li>
+<li>Administrationskonto erzeugen: <code>aurora-desk user create --admin</code></li>
+<li>Dienst starten: <code>systemctl enable --now aurora-desk</code></li>
+<li>Im Browser <code>https://desk.example.com</code> öffnen und anmelden</li>
+</ol>
+
+<p>Vor dem Erststart sollten folgende Punkte geklärt sein:</p>
+
+<ul>
+<li>Ein DNS-Eintrag zeigt auf den Server.</li>
+<li>Ein TLS-Zertifikat liegt vor.
+  <ul>
+    <li>Entweder über Let&#8217;s Encrypt bezogen,</li>
+    <li>oder aus der internen PKI ausgestellt.</li>
+  </ul>
+</li>
+<li>Der Datenbankbenutzer existiert und hat Schreibrechte.</li>
+</ul>
+
+<p>Fortschritt der Einrichtung:</p>
+
+<ul>
+<li><input type="checkbox" checked disabled> Schema angelegt</li>
+<li><input type="checkbox" checked disabled> Administrationskonto vorhanden</li>
+<li><input type="checkbox" disabled> SMTP-Zugang hinterlegt</li>
+<li><input type="checkbox" disabled> Standorte importiert</li>
+</ul>
+
+<h2 id="taegliche-arbeit">Tägliche Arbeit</h2>
+
+<h3 id="arbeitsplatz-buchen">Arbeitsplatz buchen</h3>
+
+<p>Wähle im Kalender einen Tag und anschließend im Grundriss einen freien Platz.
+Freie Plätze sind blau, belegte grau und gesperrte schraffiert dargestellt.</p>
+
+<figure class="figure">
+  <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NDAgMzAwIiB3aWR0aD0iNjQwIiBoZWlnaHQ9IjMwMCIgZm9udC1mYW1pbHk9IkludGVyLCBzYW5zLXNlcmlmIj4KICA8cmVjdCB3aWR0aD0iNjQwIiBoZWlnaHQ9IjMwMCIgZmlsbD0iI2ZmZmZmZiIvPgogIDxyZWN0IHg9IjE2IiB5PSIxNiIgd2lkdGg9IjYwOCIgaGVpZ2h0PSIyNjgiIGZpbGw9IiNmOGZhZmMiIHN0cm9rZT0iI2NiZDVlMSIgc3Ryb2tlLXdpZHRoPSIyIi8+CiAgPGxpbmUgeDE9IjMyMCIgeTE9IjE2IiB4Mj0iMzIwIiB5Mj0iMjg0IiBzdHJva2U9IiNjYmQ1ZTEiIHN0cm9rZS13aWR0aD0iMiIvPgogIDx0ZXh0IHg9IjMwIiB5PSI0MiIgZm9udC1zaXplPSIxMyIgZm9udC13ZWlnaHQ9IjYwMCIgZmlsbD0iIzQ3NTU2OSI+UmF1bSAyLjE8L3RleHQ+CiAgPHRleHQgeD0iMzM0IiB5PSI0MiIgZm9udC1zaXplPSIxMyIgZm9udC13ZWlnaHQ9IjYwMCIgZmlsbD0iIzQ3NTU2OSI+UmF1bSAyLjI8L3RleHQ+CiAgPGcgc3Ryb2tlLXdpZHRoPSIxLjUiPgogICAgPHJlY3QgeD0iNDAiICB5PSI3MCIgIHdpZHRoPSIxMTAiIGhlaWdodD0iNTIiIHJ4PSI0IiBmaWxsPSIjZWZmNmZmIiBzdHJva2U9IiMyNTYzZWIiLz4KICAgIDxyZWN0IHg9IjE3MCIgeT0iNzAiICB3aWR0aD0iMTEwIiBoZWlnaHQ9IjUyIiByeD0iNCIgZmlsbD0iI2VmZjZmZiIgc3Ryb2tlPSIjMjU2M2ViIi8+CiAgICA8cmVjdCB4PSI0MCIgIHk9IjE1MCIgd2lkdGg9IjExMCIgaGVpZ2h0PSI1MiIgcng9IjQiIGZpbGw9IiNlMmU4ZjAiIHN0cm9rZT0iIzk0YTNiOCIvPgogICAgPHJlY3QgeD0iMTcwIiB5PSIxNTAiIHdpZHRoPSIxMTAiIGhlaWdodD0iNTIiIHJ4PSI0IiBmaWxsPSIjZWZmNmZmIiBzdHJva2U9IiMyNTYzZWIiLz4KICAgIDxyZWN0IHg9IjM2MCIgeT0iNzAiICB3aWR0aD0iMTEwIiBoZWlnaHQ9IjUyIiByeD0iNCIgZmlsbD0iI2UyZThmMCIgc3Ryb2tlPSIjOTRhM2I4Ii8+CiAgICA8cmVjdCB4PSI0OTAiIHk9IjcwIiAgd2lkdGg9IjExMCIgaGVpZ2h0PSI1MiIgcng9IjQiIGZpbGw9IiNlZmY2ZmYiIHN0cm9rZT0iIzI1NjNlYiIvPgogICAgPHJlY3QgeD0iMzYwIiB5PSIxNTAiIHdpZHRoPSIxMTAiIGhlaWdodD0iNTIiIHJ4PSI0IiBmaWxsPSIjZjFmNWY5IiBzdHJva2U9IiNjYmQ1ZTEiIHN0cm9rZS1kYXNoYXJyYXk9IjUgNCIvPgogICAgPHJlY3QgeD0iNDkwIiB5PSIxNTAiIHdpZHRoPSIxMTAiIGhlaWdodD0iNTIiIHJ4PSI0IiBmaWxsPSIjZTJlOGYwIiBzdHJva2U9IiM5NGEzYjgiLz4KICA8L2c+CiAgPGcgZm9udC1zaXplPSIxMiIgZmlsbD0iIzBmMTcyYSIgdGV4dC1hbmNob3I9Im1pZGRsZSI+CiAgICA8dGV4dCB4PSI5NSIgIHk9IjEwMSI+SEgtMi0wMTE8L3RleHQ+CiAgICA8dGV4dCB4PSIyMjUiIHk9IjEwMSI+SEgtMi0wMTI8L3RleHQ+CiAgICA8dGV4dCB4PSI5NSIgIHk9IjE4MSIgZmlsbD0iIzY0NzQ4YiI+SEgtMi0wMTM8L3RleHQ+CiAgICA8dGV4dCB4PSIyMjUiIHk9IjE4MSI+SEgtMi0wMTQ8L3RleHQ+CiAgICA8dGV4dCB4PSI0MTUiIHk9IjEwMSIgZmlsbD0iIzY0NzQ4YiI+SEgtMi0wMjE8L3RleHQ+CiAgICA8dGV4dCB4PSI1NDUiIHk9IjEwMSI+SEgtMi0wMjI8L3RleHQ+CiAgICA8dGV4dCB4PSI0MTUiIHk9IjE4MSIgZmlsbD0iIzk0YTNiOCI+Z2VzcGVycnQ8L3RleHQ+CiAgICA8dGV4dCB4PSI1NDUiIHk9IjE4MSIgZmlsbD0iIzY0NzQ4YiI+SEgtMi0wMjQ8L3RleHQ+CiAgPC9nPgogIDxnIGZvbnQtc2l6ZT0iMTEiIGZpbGw9IiM0NzU1NjkiPgogICAgPHJlY3QgeD0iNDAiIHk9IjIzOCIgd2lkdGg9IjE0IiBoZWlnaHQ9IjE0IiByeD0iMyIgZmlsbD0iI2VmZjZmZiIgc3Ryb2tlPSIjMjU2M2ViIiBzdHJva2Utd2lkdGg9IjEuNSIvPgogICAgPHRleHQgeD0iNjIiIHk9IjI0OSI+ZnJlaTwvdGV4dD4KICAgIDxyZWN0IHg9IjEyMCIgeT0iMjM4IiB3aWR0aD0iMTQiIGhlaWdodD0iMTQiIHJ4PSIzIiBmaWxsPSIjZTJlOGYwIiBzdHJva2U9IiM5NGEzYjgiIHN0cm9rZS13aWR0aD0iMS41Ii8+CiAgICA8dGV4dCB4PSIxNDIiIHk9IjI0OSI+YmVsZWd0PC90ZXh0PgogICAgPHJlY3QgeD0iMjEwIiB5PSIyMzgiIHdpZHRoPSIxNCIgaGVpZ2h0PSIxNCIgcng9IjMiIGZpbGw9IiNmMWY1ZjkiIHN0cm9rZT0iI2NiZDVlMSIgc3Ryb2tlLXdpZHRoPSIxLjUiIHN0cm9rZS1kYXNoYXJyYXk9IjQgMyIvPgogICAgPHRleHQgeD0iMjMyIiB5PSIyNDkiPmdlc3BlcnJ0PC90ZXh0PgogIDwvZz4KPC9zdmc+Cg==" alt="Grundriss">
+  <figcaption>Grundriss mit freien und belegten Plätzen. Freie Plätze lassen sich direkt anklicken.</figcaption>
+</figure>
+
+<div class="callout callout-tip">
+  <p class="callout-title">Tipp</p>
+  <div class="callout-body"><p>Mit gedrückter <code>Umschalt</code>-Taste lassen sich mehrere aufeinanderfolgende Tage in einem Zug buchen. Das spart bei wiederkehrenden Anwesenheiten viel Zeit.</p></div>
+</div>
+
+<h3 id="buchung-stornieren">Buchung stornieren</h3>
+
+<p>Eine Buchung kann bis zum Beginn des gebuchten Tages storniert werden. Danach bleibt sie als <em>verfallen</em> in der Historie stehen.</p>
+
+<div class="callout callout-caution">
+  <p class="callout-title">Achtung</p>
+  <div class="callout-body"><p>Storniert eine Administratorin eine fremde Buchung, wird die betroffene Person automatisch per E-Mail informiert. Diese Benachrichtigung lässt sich nicht unterdrücken.</p></div>
+</div>
+
+<blockquote>
+<p>Wer eine Buchung storniert, gibt den Platz sofort wieder frei. Es gibt keine
+Karenzzeit und keine Reservierung im Hintergrund.</p>
+</blockquote>
+
+<p>Über die Suche lassen sich Plätze nach Ausstattung filtern:</p>
+
+<div class="codeblock" data-lang="text" data-lines="1"><pre class="chroma"><code><span class="line"><span class="cl">standort:hamburg ausstattung:dockingstation ausstattung:zweiter-monitor
+</span></span></code></pre></div>
+
+<h2 id="automatisierung">Automatisierung</h2>
+
+<h3 id="kommandozeile">Kommandozeile</h3>
+
+<p>Alle Funktionen der Oberfläche stehen auch als Unterbefehl zur Verfügung.</p>
+
+<div class="codeblock" data-lang="shell" data-lines="3"><pre class="chroma"><code><span class="line"><span class="cl">aurora-desk booking list --user anna --from 2026-09-01 --to 2026-09-30
+</span></span><span class="line"><span class="cl">aurora-desk booking create --user anna --desk HH-2-014 --date 2026-09-08
+</span></span><span class="line"><span class="cl">aurora-desk booking cancel --id <span class="m">4711</span>
+</span></span></code></pre></div>
+
+<h3 id="api-zugriff">API-Zugriff</h3>
+
+<p>Der folgende Ausschnitt zeigt einen minimalen Client in Go.</p>
+
+<div class="codeblock" data-lang="go" data-lines="36"><pre class="chroma"><code><span class="line"><span class="cl"><span class="kn">package</span><span class="w"> </span><span class="nx">main</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="kn">import</span><span class="w"> </span><span class="p">(</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="s">&#34;context&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="s">&#34;encoding/json&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="s">&#34;fmt&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="s">&#34;net/http&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="s">&#34;time&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="kd">type</span><span class="w"> </span><span class="nx">Booking</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">ID</span><span class="w">   </span><span class="kt">int</span><span class="w">       </span><span class="s">`</span><span class="s">json:&#34;id&#34;</span><span class="s">`</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">Desk</span><span class="w"> </span><span class="kt">string</span><span class="w">    </span><span class="s">`</span><span class="s">json:&#34;desk&#34;</span><span class="s">`</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">Date</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Time</span><span class="w"> </span><span class="s">`</span><span class="s">json:&#34;date&#34;</span><span class="s">`</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="kd">func</span><span class="w"> </span><span class="nf">list</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">token</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="p">[</span><span class="p">]</span><span class="nx">Booking</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">req</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">http</span><span class="p">.</span><span class="nf">NewRequestWithContext</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">http</span><span class="p">.</span><span class="nx">MethodGet</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="s">&#34;https://desk.example.com/api/v1/bookings&#34;</span><span class="p">,</span><span class="w"> </span><span class="kc">nil</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="k">return</span><span class="w"> </span><span class="kc">nil</span><span class="p">,</span><span class="w"> </span><span class="nx">fmt</span><span class="p">.</span><span class="nf">Errorf</span><span class="p">(</span><span class="s">&#34;build request: %w&#34;</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">req</span><span class="p">.</span><span class="nx">Header</span><span class="p">.</span><span class="nf">Set</span><span class="p">(</span><span class="s">&#34;Authorization&#34;</span><span class="p">,</span><span class="w"> </span><span class="s">&#34;Bearer &#34;</span><span class="o">+</span><span class="nx">token</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">resp</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">http</span><span class="p">.</span><span class="nx">DefaultClient</span><span class="p">.</span><span class="nf">Do</span><span class="p">(</span><span class="nx">req</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="k">return</span><span class="w"> </span><span class="kc">nil</span><span class="p">,</span><span class="w"> </span><span class="nx">fmt</span><span class="p">.</span><span class="nf">Errorf</span><span class="p">(</span><span class="s">&#34;call api: %w&#34;</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">defer</span><span class="w"> </span><span class="nx">resp</span><span class="p">.</span><span class="nx">Body</span><span class="p">.</span><span class="nf">Close</span><span class="p">(</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="kd">var</span><span class="w"> </span><span class="nx">out</span><span class="w"> </span><span class="p">[</span><span class="p">]</span><span class="nx">Booking</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">json</span><span class="p">.</span><span class="nf">NewDecoder</span><span class="p">(</span><span class="nx">resp</span><span class="p">.</span><span class="nx">Body</span><span class="p">)</span><span class="p">.</span><span class="nf">Decode</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">out</span><span class="p">)</span><span class="p">;</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="k">return</span><span class="w"> </span><span class="kc">nil</span><span class="p">,</span><span class="w"> </span><span class="nx">fmt</span><span class="p">.</span><span class="nf">Errorf</span><span class="p">(</span><span class="s">&#34;decode: %w&#34;</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">return</span><span class="w"> </span><span class="nx">out</span><span class="p">,</span><span class="w"> </span><span class="kc">nil</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div>
+
+<p>Der Ablauf einer Buchung im Zusammenspiel der Dienste:</p>
+
+<pre class="mermaid">sequenceDiagram
+    participant U as Anwender
+    participant G as Gateway
+    participant B as Buchungsdienst
+    participant M as Mailer
+    U-&gt;&gt;G: POST /api/v1/bookings
+    G-&gt;&gt;B: Buchung anlegen
+    B--&gt;&gt;G: 201 Created
+    G--&gt;&gt;U: Bestaetigung
+    B-&gt;&gt;M: Bestaetigungsmail</pre>
+
+<h2 id="fehlerbehebung">Fehlerbehebung</h2>
+
+<h3 id="anmeldung-schlaegt-fehl">Anmeldung schlägt fehl</h3>
+
+<p>Prüfe zuerst, ob die Basis-URL korrekt gesetzt ist. Ein häufiger Fehler ist eine
+Basis-URL mit abschließendem Schrägstrich.</p>
+
+<div class="codeblock" data-lang="diff" data-lines="3"><pre class="chroma"><code><span class="line"><span class="cl"> server:
+</span></span><span class="line"><span class="cl"><span class="gd">-  base_url: &#34;https://desk.example.com/&#34;
+</span></span></span><span class="line"><span class="cl"><span class="gi">+  base_url: &#34;https://desk.example.com&#34;
+</span></span></span></code></pre></div>
+
+<h3 id="bekannte-meldungen">Bekannte Meldungen</h3>
+
+<table>
+<thead><tr><th>Meldung</th><th>Ursache</th><th>Abhilfe</th></tr></thead>
+<tbody>
+<tr><td><code>E1004 desk not bookable</code></td><td>Platz gesperrt oder außer Betrieb</td><td>Sperrung im Inventar aufheben</td></tr>
+<tr><td><code>E1017 horizon exceeded</code></td><td>Datum jenseits <code>horizon_days</code></td><td>Horizont erhöhen oder später buchen</td></tr>
+<tr><td><code>E2003 smtp unavailable</code></td><td>Mailserver nicht erreichbar</td><td>SMTP-Zugang und Firewallregeln prüfen</td></tr>
+<tr><td><code>E5001 migration pending</code></td><td>Schema veraltet</td><td><code>aurora-desk migrate up</code> ausführen</td></tr>
+</tbody>
+</table>
+
+<hr>
+
+<p><em>Aurora Desk ist ein fiktives Produkt und dient hier ausschließlich als
+Beispieldokument für das Layout.</em></p>
+
+<div class="footnotes">
+<hr>
+<ol>
+<li id="fn:1">Fußnoten erscheinen gesammelt am Ende des Dokuments.&#160;<a class="footnote-backref" href="#fnref:1">&#8617;</a></li>
+</ol>
+</div>
+
+</main>
+
+<script src="../internal/assets/vendor/mermaid.min.js"></script>
+<script>
+(function () {
+  var cs = getComputedStyle(document.documentElement);
+  function v(n, f) { var x = cs.getPropertyValue(n); return x ? x.trim() : f; }
+  mermaid.initialize({
+    startOnLoad: false, securityLevel: 'strict', theme: 'base',
+    fontFamily: v('--font-body', 'Inter, sans-serif'),
+    flowchart: { curve: 'basis', useMaxWidth: true, htmlLabels: false },
+    sequence: { useMaxWidth: true },
+    themeVariables: {
+      fontSize: '13px',
+      background: v('--page', '#ffffff'),
+      primaryColor: v('--accent-soft', '#eff6ff'),
+      primaryTextColor: v('--ink', '#0f172a'),
+      primaryBorderColor: v('--accent', '#2563eb'),
+      secondaryColor: v('--surface', '#f8fafc'),
+      secondaryTextColor: v('--ink', '#0f172a'),
+      secondaryBorderColor: v('--rule-strong', '#cbd5e1'),
+      tertiaryColor: v('--page', '#ffffff'),
+      tertiaryBorderColor: v('--rule-strong', '#cbd5e1'),
+      mainBkg: v('--accent-soft', '#eff6ff'),
+      nodeBorder: v('--accent', '#2563eb'),
+      nodeTextColor: v('--ink', '#0f172a'),
+      lineColor: v('--ink-muted', '#475569'),
+      textColor: v('--ink', '#0f172a'),
+      edgeLabelBackground: v('--page', '#ffffff'),
+      clusterBkg: v('--surface', '#f8fafc'),
+      clusterBorder: v('--rule-strong', '#cbd5e1'),
+      titleColor: v('--ink', '#0f172a'),
+      noteBkgColor: v('--surface', '#f8fafc'),
+      noteBorderColor: v('--rule-strong', '#cbd5e1'),
+      noteTextColor: v('--ink', '#0f172a')
+    }
+  });
+})();
+window.__md2pdfReady = false;
+(function () {
+  function finish() { window.__md2pdfReady = true; }
+  var run = window.mermaid
+    ? window.mermaid.run({ querySelector: 'pre.mermaid' }).catch(function (e) { console.error(e); })
+    : Promise.resolve();
+  run.then(function () { return (document.fonts && document.fonts.ready) || Promise.resolve(); })
+     .then(function () {
+       return new Promise(function (r) { requestAnimationFrame(function () { requestAnimationFrame(r); }); });
+     })
+     .then(finish).catch(finish);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,602 @@
+/* md2pdf — Standard-Theme "technisch-klar".
+   Alle Farben, Abstaende und Schriftgroessen liegen als Custom Properties auf :root.
+   Eigenes Branding braucht daher meist nur eine kleine --css-Datei, die diese Werte
+   ueberschreibt, kein Nachbauen der Regeln. */
+
+:root {
+  /* Akzent */
+  --accent:        #2563eb;
+  --accent-strong: #1d4ed8;
+  --accent-soft:   #eff6ff;
+
+  /* Text */
+  --ink:        #0f172a;
+  --ink-2:      #1e293b;
+  --ink-muted:  #475569;
+  --ink-faint:  #94a3b8;
+
+  /* Flaechen und Linien */
+  --page:        #ffffff;
+  --surface:     #f8fafc;
+  --surface-2:   #f1f5f9;
+  --rule:        #e2e8f0;
+  --rule-strong: #cbd5e1;
+
+  /* Callouts: Rand / Flaeche / Kontur */
+  --note-line:      #2563eb;  --note-bg:      #eff6ff;  --note-edge:      #bfdbfe;
+  --tip-line:       #059669;  --tip-bg:       #ecfdf5;  --tip-edge:       #a7f3d0;
+  --important-line: #7c3aed;  --important-bg: #f5f3ff;  --important-edge: #ddd6fe;
+  --warning-line:   #b45309;  --warning-bg:   #fffbeb;  --warning-edge:   #fde68a;
+  --caution-line:   #dc2626;  --caution-bg:   #fef2f2;  --caution-edge:   #fecaca;
+
+  /* Typografie */
+  --font-body: "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "JetBrains Mono", "Cascadia Mono", "Consolas", "DejaVu Sans Mono", monospace;
+  --size-body: 10.5pt;
+  --leading:   1.62;
+
+  /* Vertikaler Rhythmus */
+  --space:   9pt;
+  --space-2: 18pt;
+  --space-3: 27pt;
+
+  --radius: 4pt;
+
+  /* Abstand zwischen Akzentleiste und Text an H2 */
+  --bar-offset: 12pt;
+
+  /* Beschriftungen — hier umstellen fuer andere Sprachen */
+  --label-figure: "Abbildung";
+  --label-table:  "Tabelle";
+}
+
+/* ---------------------------------------------------------------- Grundlagen */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+body {
+  margin: 0;
+  background: var(--page);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: var(--size-body);
+  line-height: var(--leading);
+  hyphens: auto;
+}
+
+body:lang(en) { --label-figure: "Figure"; --label-table: "Table"; }
+
+/* ------------------------------------------------------------------ Deckblatt */
+
+.cover {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  break-after: page;
+  page: cover;
+}
+
+.cover-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding-bottom: var(--space-2);
+  border-bottom: 1pt solid var(--rule);
+}
+
+.cover-kicker {
+  font-size: 9pt;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent);
+  padding-left: 12pt;
+  border-left: 4pt solid var(--accent);
+  line-height: 1.35;
+  min-height: 30pt;
+  display: flex;
+  align-items: center;
+}
+
+.cover-logo { max-height: 46pt; max-width: 45%; object-fit: contain; }
+
+.cover-body { flex: 1 1 auto; display: flex; flex-direction: column; justify-content: flex-end; padding-bottom: 24%; }
+
+.cover-title {
+  margin: 0;
+  font-size: 34pt;
+  font-weight: 640;
+  line-height: 1.12;
+  letter-spacing: -0.022em;
+  color: var(--ink);
+  hyphens: none;
+}
+
+.cover-subtitle {
+  margin: var(--space) 0 0;
+  font-size: 15pt;
+  font-weight: 400;
+  line-height: 1.35;
+  color: var(--ink-muted);
+  hyphens: none;
+}
+
+.cover-foot { border-top: 1pt solid var(--rule-strong); padding-top: var(--space); }
+
+.cover-meta {
+  display: flex;
+  font-variant-numeric: tabular-nums;
+  flex-wrap: wrap;
+  gap: 4pt 20pt;
+  margin: 0;
+  font-size: 9.5pt;
+  color: var(--ink-muted);
+}
+
+.cover-meta > div { display: flex; gap: 6pt; }
+.cover-meta dt { font-weight: 600; color: var(--ink-faint); }
+.cover-meta dd { margin: 0; color: var(--ink-2); }
+
+/* --------------------------------------------------------- Inhaltsverzeichnis */
+
+.toc { break-after: page; counter-reset: toc2; }
+
+.toc-heading {
+  margin: 0 0 var(--space-2);
+  padding-bottom: 6pt;
+  border-bottom: 1pt solid var(--rule-strong);
+  font-size: 16pt;
+  font-weight: 620;
+  letter-spacing: -0.01em;
+}
+
+.toc-list { list-style: none; margin: 0; padding: 0; }
+
+.toc-list li { break-inside: avoid; }
+
+.toc-list a {
+  display: block;
+  text-decoration: none;
+  color: var(--ink-2);
+  padding: 2.5pt 0;
+  hyphens: none;
+}
+
+.toc-l2 { counter-increment: toc2; counter-reset: toc3; }
+.toc-l3 { counter-increment: toc3; }
+
+.toc-l1 > a, .toc-l2 > a {
+  font-weight: 600;
+  font-size: 11pt;
+  color: var(--ink);
+  margin-top: 7pt;
+  border-top: 1pt solid var(--rule);
+  padding-top: 7pt;
+}
+
+.toc-list > li:first-child > a { margin-top: 0; border-top: 0; padding-top: 0; }
+
+.toc-l3 > a { padding-left: 22pt; font-size: 10pt; color: var(--ink-muted); }
+.toc-l4 > a { padding-left: 44pt; font-size: 9.5pt; color: var(--ink-muted); }
+
+body.numbered .toc-l2 > a::before {
+  content: counter(toc2) "  ";
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+body.numbered .toc-l3 > a::before {
+  content: counter(toc2) "." counter(toc3) "  ";
+  color: var(--ink-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ------------------------------------------------------------ Ueberschriften */
+
+.doc { counter-reset: h2 figure table; }
+
+.doc h1, .doc h2, .doc h3, .doc h4, .doc h5, .doc h6 {
+  color: var(--ink);
+  font-weight: 620;
+  letter-spacing: -0.012em;
+  line-height: 1.25;
+  break-after: avoid-page;
+  break-inside: avoid;
+  hyphens: none;
+}
+
+.doc h1 { font-size: 21pt; margin: var(--space-3) 0 var(--space); }
+
+.doc h2 {
+  font-size: 16pt;
+  margin: var(--space-3) 0 var(--space);
+  padding-left: var(--bar-offset);
+  border-left: 4pt solid var(--accent);
+  counter-increment: h2;
+  counter-reset: h3 figure table;
+}
+
+.doc h3 { font-size: 12.5pt; margin: var(--space-2) 0 6pt; counter-increment: h3; counter-reset: h4; }
+.doc h4 { font-size: 11pt; margin: var(--space-2) 0 4pt; color: var(--ink-2); counter-increment: h4; }
+.doc h5, .doc h6 { font-size: 10.5pt; margin: var(--space) 0 3pt; color: var(--ink-muted); }
+
+.doc > :first-child { margin-top: 0; }
+
+body.numbered .doc h2::before {
+  content: counter(h2) "  ";
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+body.numbered .doc h3::before {
+  content: counter(h2) "." counter(h3) "  ";
+  color: var(--ink-muted);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+body.numbered .doc h4::before {
+  content: counter(h2) "." counter(h3) "." counter(h4) "  ";
+  color: var(--ink-muted);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Kapitel auf neuer Seite beginnen: <body class="chapters"> bzw. Utility-Klasse */
+body.chapters .doc h2 { break-before: page; }
+body.chapters .doc > h2:first-child { break-before: auto; }
+.new-page { break-before: page; }
+
+/* Anker sollen im PDF nicht am Seitenkopf kleben */
+.doc :is(h1, h2, h3, h4, h5, h6) > a.anchor { display: none; }
+
+/* -------------------------------------------------------------- Fliesstext */
+
+.doc p { margin: 0 0 var(--space); orphans: 3; widows: 3; }
+
+.doc a { color: var(--accent-strong); text-decoration: underline; text-underline-offset: 2px; text-decoration-thickness: 0.06em; }
+
+.doc strong { font-weight: 640; color: var(--ink); }
+.doc em { font-style: italic; }
+
+.doc small { font-size: 9pt; color: var(--ink-muted); }
+
+.doc hr { border: 0; border-top: 1pt solid var(--rule); margin: var(--space-2) 0; }
+
+.doc ul, .doc ol { margin: 0 0 var(--space); padding-left: 20pt; }
+.doc li { margin: 0 0 3pt; orphans: 2; widows: 2; }
+.doc li > ul, .doc li > ol { margin-top: 3pt; }
+.doc ol { list-style: decimal; }
+.doc ul { list-style: none; }
+
+.doc ul > li { position: relative; }
+.doc ul > li::before {
+  content: "";
+  position: absolute;
+  left: -12pt;
+  top: 0.58em;
+  width: 4pt;
+  height: 4pt;
+  border-radius: 50%;
+  background: var(--rule-strong);
+}
+.doc ul > li:has(> input[type="checkbox"])::before { content: none; }
+
+.doc input[type="checkbox"] {
+  appearance: none;
+  width: 9pt; height: 9pt;
+  margin: 0 5pt 0 -14pt;
+  vertical-align: -0.5pt;
+  border: 1pt solid var(--rule-strong);
+  border-radius: 2pt;
+  background: var(--page);
+}
+.doc input[type="checkbox"]:checked {
+  border-color: var(--accent);
+  background: var(--accent) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 8.5l3.2 3.2L13 5'/%3E%3C/svg%3E") center/8pt no-repeat;
+}
+
+.doc dl { margin: 0 0 var(--space); }
+.doc dt { font-weight: 620; margin-top: 6pt; }
+.doc dd { margin: 0 0 3pt 16pt; color: var(--ink-2); }
+
+/* Zitat (echtes Blockquote, kein Callout) */
+.doc blockquote {
+  margin: var(--space) 0;
+  padding: 2pt 0 2pt 16pt;
+  border-left: 2pt solid var(--rule-strong);
+  color: var(--ink-muted);
+  font-style: italic;
+  break-inside: avoid;
+}
+.doc blockquote > :last-child { margin-bottom: 0; }
+
+/* --------------------------------------------------------------- Callouts */
+
+.callout {
+  --line: var(--note-line);
+  --bg:   var(--note-bg);
+  --edge: var(--note-edge);
+  margin: var(--space) 0 var(--space-2);
+  padding: 10pt 14pt 10pt 13pt;
+  background: var(--bg);
+  border: 1pt solid var(--edge);
+  border-left: 3pt solid var(--line);
+  border-radius: var(--radius);
+  break-inside: avoid;
+}
+
+.callout-note      { --line: var(--note-line);      --bg: var(--note-bg);      --edge: var(--note-edge); }
+.callout-tip       { --line: var(--tip-line);       --bg: var(--tip-bg);       --edge: var(--tip-edge); }
+.callout-important { --line: var(--important-line); --bg: var(--important-bg); --edge: var(--important-edge); }
+.callout-warning   { --line: var(--warning-line);   --bg: var(--warning-bg);   --edge: var(--warning-edge); }
+.callout-caution   { --line: var(--caution-line);   --bg: var(--caution-bg);   --edge: var(--caution-edge); }
+
+.callout-title {
+  display: flex;
+  align-items: center;
+  gap: 6pt;
+  margin: 0 0 5pt;
+  font-size: 9pt;
+  font-weight: 650;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--line);
+}
+
+.callout-title::before {
+  content: "";
+  flex: none;
+  width: 12pt;
+  height: 12pt;
+  background-color: var(--line);
+  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+  -webkit-mask-position: center;  mask-position: center;
+  -webkit-mask-size: 12pt 12pt;   mask-size: 12pt 12pt;
+}
+
+.callout-note .callout-title::before {
+  -webkit-mask-image: var(--icon-info); mask-image: var(--icon-info);
+}
+.callout-tip .callout-title::before {
+  -webkit-mask-image: var(--icon-bulb); mask-image: var(--icon-bulb);
+}
+.callout-important .callout-title::before {
+  -webkit-mask-image: var(--icon-star); mask-image: var(--icon-star);
+}
+.callout-warning .callout-title::before {
+  -webkit-mask-image: var(--icon-warn); mask-image: var(--icon-warn);
+}
+.callout-caution .callout-title::before {
+  -webkit-mask-image: var(--icon-stop); mask-image: var(--icon-stop);
+}
+
+.callout-body > :last-child { margin-bottom: 0; }
+.callout-body > :first-child { margin-top: 0; }
+.callout-body p { orphans: 2; widows: 2; }
+
+:root {
+  --icon-info: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M12 11v5'/%3E%3Cpath d='M12 7.6v.6'/%3E%3C/svg%3E");
+  --icon-bulb: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 18h6'/%3E%3Cpath d='M10 21.5h4'/%3E%3Cpath d='M12 2.5a6 6 0 0 0-3.6 10.8c.6.5 1 1.2 1.1 2h5c.1-.8.5-1.5 1.1-2A6 6 0 0 0 12 2.5z'/%3E%3C/svg%3E");
+  --icon-star: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1.1 5.9L12 17l-5.3 2.7 1.1-5.9L3.5 9.7l5.9-.8z'/%3E%3C/svg%3E");
+  --icon-warn: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3.8L1.9 20.2h20.2z'/%3E%3Cpath d='M12 10v4.2'/%3E%3Cpath d='M12 17.2v.6'/%3E%3C/svg%3E");
+  --icon-stop: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M8.4 2.6h7.2L21.4 8.4v7.2l-5.8 5.8H8.4L2.6 15.6V8.4z'/%3E%3Cpath d='M12 7.6v5'/%3E%3Cpath d='M12 16v.6'/%3E%3C/svg%3E");
+}
+
+/* --------------------------------------------------------------- Tabellen */
+
+.doc table {
+  width: 100%;
+  font-variant-numeric: tabular-nums;
+  margin: var(--space) 0 var(--space-2);
+  border-collapse: collapse;
+  font-size: 9.5pt;
+  line-height: 1.45;
+}
+
+.doc thead { display: table-header-group; }
+.doc tfoot { display: table-footer-group; }
+.doc tr { break-inside: avoid; }
+
+.doc th {
+  text-align: left;
+  font-weight: 640;
+  color: var(--ink);
+  padding: 6pt 8pt;
+  border-bottom: 1.5pt solid var(--ink-2);
+  background: var(--surface-2);
+  hyphens: none;
+}
+
+.doc td {
+  padding: 5.5pt 8pt;
+  border-bottom: 0.75pt solid var(--rule);
+  vertical-align: top;
+}
+
+.doc tbody tr:nth-child(even) td { background: var(--surface); }
+.doc table :is(th, td):first-child { padding-left: 0; }
+.doc table :is(th, td):last-child  { padding-right: 0; }
+.doc td code { font-size: 0.94em; }
+
+/* --------------------------------------------------------------- Code */
+
+.doc code {
+  font-family: var(--font-mono);
+  font-size: 0.88em;
+  font-variant-ligatures: none;
+  background: var(--surface-2);
+  border: 0.75pt solid var(--rule);
+  border-radius: 3pt;
+  padding: 0.5pt 3.5pt;
+  hyphens: none;
+  word-break: break-word;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
+/* In Tabellen wuerde die Chip-Optik die Zellen zerfasern — dort reicht die
+   Festbreitenschrift als Auszeichnung. */
+.doc :is(th, td) code {
+  background: none;
+  border: 0;
+  padding: 0;
+  color: var(--ink-2);
+}
+
+.codeblock {
+  position: relative;
+  margin: var(--space) 0 var(--space-2);
+  background: var(--surface);
+  border: 0.75pt solid var(--rule);
+  border-radius: var(--radius);
+}
+
+.codeblock::after {
+  content: attr(data-lang);
+  position: absolute;
+  top: 0; right: 0;
+  padding: 3pt 8pt;
+  font-size: 7.5pt;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  pointer-events: none;
+}
+
+.codeblock[data-lang=""]::after,
+.codeblock:not([data-lang])::after,
+.codeblock[data-lang="text"]::after,
+.codeblock[data-lang="txt"]::after,
+.codeblock[data-lang="plain"]::after,
+.codeblock[data-lang="plaintext"]::after,
+.codeblock[data-lang="output"]::after { content: none; }
+
+.codeblock pre {
+  margin: 0;
+  padding: 10pt 12pt;
+  overflow: visible;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: var(--font-mono);
+  font-size: 8.6pt;
+  line-height: 1.5;
+  font-variant-ligatures: none;
+  tab-size: 4;
+  orphans: 3;
+  widows: 3;
+}
+
+.codeblock pre code {
+  background: none;
+  border: 0;
+  padding: 0;
+  font-size: inherit;
+}
+
+/* Kurze Bloecke nicht ueber Seitengrenzen zerreissen; lange duerfen umbrechen,
+   sonst entstehen halbleere Seiten. data-lines setzt der Markdown-Renderer. */
+.codeblock[data-lines="1"],  .codeblock[data-lines="2"],  .codeblock[data-lines="3"],
+.codeblock[data-lines="4"],  .codeblock[data-lines="5"],  .codeblock[data-lines="6"],
+.codeblock[data-lines="7"],  .codeblock[data-lines="8"],  .codeblock[data-lines="9"],
+.codeblock[data-lines="10"], .codeblock[data-lines="11"], .codeblock[data-lines="12"],
+.codeblock[data-lines="13"], .codeblock[data-lines="14"], .codeblock[data-lines="15"],
+.codeblock[data-lines="16"], .codeblock[data-lines="17"], .codeblock[data-lines="18"],
+.codeblock[data-lines="19"], .codeblock[data-lines="20"], .codeblock[data-lines="21"],
+.codeblock[data-lines="22"], .codeblock[data-lines="23"], .codeblock[data-lines="24"] {
+  break-inside: avoid;
+}
+
+/* ------------------------------------------------------- Bilder / Figuren */
+
+.doc img { max-width: 100%; height: auto; }
+
+.figure {
+  margin: var(--space-2) 0;
+  break-inside: avoid;
+  text-align: center;
+  counter-increment: figure;
+}
+
+.figure img {
+  max-width: 100%;
+  max-height: 190mm;
+  border: 0.75pt solid var(--rule);
+  border-radius: var(--radius);
+}
+
+.figure figcaption {
+  margin-top: 6pt;
+  font-size: 9pt;
+  line-height: 1.45;
+  color: var(--ink-muted);
+  text-align: left;
+  hyphens: none;
+}
+
+.figure figcaption::before {
+  content: var(--label-figure) " " counter(figure) ": ";
+  font-weight: 640;
+  color: var(--ink-2);
+}
+
+/* ---------------------------------------------------------------- Mermaid */
+
+.mermaid {
+  margin: var(--space-2) 0;
+  padding: 0;
+  text-align: center;
+  break-inside: avoid;
+  background: none;
+  border: 0;
+  font-family: var(--font-body);
+}
+
+.mermaid svg { max-width: 100%; height: auto; }
+
+/* -------------------------------------------------------------- Fussnoten */
+
+.footnotes {
+  margin-top: var(--space-3);
+  padding-top: var(--space);
+  border-top: 1pt solid var(--rule);
+  font-size: 9pt;
+  color: var(--ink-muted);
+}
+.footnotes hr { display: none; }
+.footnotes ol { padding-left: 14pt; }
+.footnotes li { margin-bottom: 2pt; }
+.footnote-backref { text-decoration: none; }
+
+sup a { text-decoration: none; font-size: 0.8em; color: var(--accent-strong); }
+
+/* ------------------------------------------------- Bildschirm-Vorschau */
+
+@media screen {
+  body {
+    background: #e9edf2;
+    padding: 24px 0;
+  }
+
+  .cover, .toc, .doc {
+    width: 210mm;
+    min-height: 297mm;
+    margin: 0 auto 18px;
+    padding: 25mm 20mm 22mm;
+    background: var(--page);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.10), 0 12px 28px rgba(15, 23, 42, 0.10);
+  }
+
+  .cover { min-height: 297mm; }
+}
+
+@media print {
+  body { padding: 0; background: none; }
+  .cover, .toc, .doc { width: auto; min-height: 0; margin: 0; padding: 0; box-shadow: none; }
+  .cover { min-height: 100vh; }
+  a { color: var(--accent-strong); }
+}

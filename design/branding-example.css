@@ -1,0 +1,50 @@
+/* Beispiel fuer eigenes Branding.
+   Aufruf:  md2pdf handbuch.md --css design/branding-example.css
+
+   Das Standard-Theme legt alle Farben, Schriftgroessen und Abstaende als Custom
+   Properties auf :root ab. Fuer ein eigenes Corporate Design genuegt es daher in
+   aller Regel, hier ein paar Werte zu ueberschreiben — die Regeln selbst muessen
+   nicht nachgebaut werden. Diese Datei wird nach dem Theme geladen und gewinnt. */
+
+:root {
+  /* Akzentfarbe: bestimmt Deckblattleiste, Kapitelbalken, Nummerierung, Links. */
+  --accent:        #0f766e;
+  --accent-strong: #115e59;
+  --accent-soft:   #f0fdfa;
+
+  /* Textfarben etwas waermer. */
+  --ink:       #1c1917;
+  --ink-2:     #292524;
+  --ink-muted: #57534e;
+  --ink-faint: #a8a29e;
+
+  /* Flaechen und Linien. */
+  --surface:     #fafaf9;
+  --surface-2:   #f5f5f4;
+  --rule:        #e7e5e4;
+  --rule-strong: #d6d3d1;
+
+  /* Schriften: die eingebetteten Familien heissen "Inter" und "JetBrains Mono".
+     Eigene Schriften brauchen ein @font-face mit Data-URI, weil das PDF ohne
+     Netzwerkzugriff gerendert wird. */
+  --font-body: "Inter", "Segoe UI", sans-serif;
+
+  /* Etwas kompakterer Satz. */
+  --size-body: 10pt;
+  --leading:   1.55;
+}
+
+/* Beispiel: Kapitel (H2) jeweils auf einer neuen Seite beginnen lassen.
+   Alternativ uebernimmt das die Option --chapter-pages. */
+/* .doc h2 { break-before: page; }
+   .doc > h2:first-child { break-before: auto; } */
+
+/* Beispiel: Deckblatt mit farbiger Kopfflaeche statt reinem Weiss. */
+/*
+.cover-head {
+  background: var(--accent-soft);
+  margin: -6pt -12pt var(--space-2);
+  padding: 12pt;
+  border-bottom: 0;
+}
+*/
