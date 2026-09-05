@@ -1,54 +1,54 @@
-# Designschicht
+# Design layer
 
-Hier liegt die Referenz fuer das Aussehen der erzeugten PDFs. Die eigentlichen
-Assets, die ins Binary eingebettet werden, liegen unter `internal/assets/`.
+This is where the reference for the look of the generated PDFs lives. The
+actual assets that get embedded into the binary live under
+`internal/assets/`.
 
-## Dateien
+## Files
 
-| Datei                   | Zweck                                                                 |
+| File                    | Purpose                                                                |
 | ----------------------- | --------------------------------------------------------------------- |
-| `preview.html`          | Statische Designreferenz mit allen unterstuetzten Elementen            |
-| `branding-example.css`  | Beispiel, wie sich das Theme ueber `--css` umfaerben laesst            |
+| `preview.html`          | Static design reference with all supported elements                    |
+| `branding-example.css`  | Example of how to recolor the theme via `--css`                       |
 
-`preview.html` bindet die Theme-Dateien aus `internal/assets/theme/` per
-`<link>` ein. Es gibt also keine zweite Kopie des CSS — was hier zu sehen ist,
-ist genau das, was das Binary spaeter ausliefert.
+`preview.html` pulls in the theme files from `internal/assets/theme/` via
+`<link>`. So there's no second copy of the CSS — what you see here is
+exactly what the binary ships later on.
 
-## Ansehen
+## Viewing
 
 ```fish
 xdg-open design/preview.html
 ```
 
-## Als PDF pruefen
+## Checking as a PDF
 
 ```fish
 chromium --headless=new --disable-gpu --no-pdf-header-footer \
   --print-to-pdf=/tmp/preview.pdf design/preview.html
 ```
 
-Kopf- und Fusszeile fehlen dabei, weil der CLI-Weg keine Templates kennt. Das
-vollstaendige Ergebnis inklusive laufender Kopfzeile und Seitenzahlen erzeugt
-erst `md2pdf` selbst ueber das DevTools-Protokoll.
+Header and footer are missing here because the CLI route doesn't know about
+templates. Only `md2pdf` itself, via the DevTools protocol, produces the
+full result including the running header and page numbers.
 
-## Elemente in der Vorschau
+## Elements in the preview
 
-Deckblatt, Inhaltsverzeichnis, Ueberschriften H2–H4 mit Nummerierung,
-Fliesstext, Aufzaehlungen (auch verschachtelt), nummerierte Listen,
-Aufgabenlisten, Definitionslisten, Zitat, alle fuenf Callout-Arten,
-Tabellen, Inline-Code, Codebloecke (bash, yaml, go, shell, diff, text),
-Abbildung mit Bildunterschrift und Nummerierung, zwei Mermaid-Diagramme,
-Fussnoten.
+Cover page, table of contents, H2–H4 headings with numbering, body text,
+bullet lists (including nested ones), numbered lists, task lists,
+definition lists, blockquote, all five callout types, tables, inline code,
+code blocks (bash, yaml, go, shell, diff, text), a figure with caption and
+numbering, two Mermaid diagrams, footnotes.
 
-## Schriften austauschen
+## Swapping fonts
 
-Die Fonts liegen als woff2 unter `internal/assets/fonts/` und werden von
-`scripts/genfonts.sh` als Data-URIs nach `internal/assets/theme/fonts.css`
-geschrieben. Nach dem Austausch einer woff2-Datei:
+The fonts live as woff2 under `internal/assets/fonts/` and get written by
+`scripts/genfonts.sh` as data URIs into `internal/assets/theme/fonts.css`.
+After swapping a woff2 file:
 
 ```fish
 ./scripts/genfonts.sh
 ```
 
-Beide mitgelieferten Schriften stehen unter der SIL Open Font License 1.1,
-die Lizenztexte liegen daneben.
+Both bundled fonts are licensed under the SIL Open Font License 1.1; the
+license texts sit right next to them.

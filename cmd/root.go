@@ -18,6 +18,14 @@ import (
 // version holds the program version, overridable via -ldflags -X.
 var version = "dev"
 
+// authors is shown in the help footer and alongside --version.
+const authors = "Gregor Stübner & Claude (Anthropic)"
+
+// credits is the one-line footer under the help output.
+func credits() string {
+	return fmt.Sprintf("md2pdf %s · %s", version, authors)
+}
+
 // errUsage marks errors caused by invalid CLI arguments (exit code 2).
 var errUsage = errors.New("ungültige Argumente")
 
@@ -80,7 +88,7 @@ func newRootCmd(o *config.Options) *cobra.Command {
 		SilenceErrors: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if showVersion {
-				fmt.Fprintln(cmd.OutOrStdout(), "md2pdf "+version)
+				fmt.Fprintln(cmd.OutOrStdout(), credits())
 				return nil
 			}
 
@@ -167,6 +175,8 @@ func newRootCmd(o *config.Options) *cobra.Command {
 			return nil
 		},
 	}
+
+	cmd.SetHelpTemplate(cmd.HelpTemplate() + "\n" + credits() + "\n")
 
 	flags := cmd.Flags()
 	flags.StringVarP(&outputFlag, "output", "o", "", "Ziel-PDF (Default: Eingabename mit .pdf)")
