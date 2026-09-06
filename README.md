@@ -259,8 +259,24 @@ Three features go beyond plain GFM:
 ### Mermaid diagrams
 
 A fenced block tagged `mermaid` becomes a diagram. GitHub understands the same
-blocks, which is why the two examples below show up as graphics here and not
-as source code — what you see is what md2pdf draws into the PDF.
+blocks, so each example below appears twice: first the Markdown you write,
+then the picture it turns into — here on GitHub, and the same way in the PDF.
+
+You write:
+
+````markdown
+```mermaid
+flowchart LR
+    B[Browser] --> G[API-Gateway]
+    G --> A[Booking service]
+    G --> I[Inventory service]
+    A --> D[(PostgreSQL)]
+    I --> D
+    A --> Q[/Notifications/]
+```
+````
+
+And get:
 
 ```mermaid
 flowchart LR
@@ -272,7 +288,22 @@ flowchart LR
     A --> Q[/Notifications/]
 ```
 
-Sequence diagrams work the same way:
+Sequence diagrams work the same way. You write:
+
+````markdown
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant G as Gateway
+    participant B as Booking service
+    U->>G: POST /api/v1/bookings
+    G->>B: create booking
+    B-->>G: 201 Created
+    G-->>U: confirmation
+```
+````
+
+And get:
 
 ```mermaid
 sequenceDiagram

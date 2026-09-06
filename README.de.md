@@ -265,9 +265,25 @@ Drei Besonderheiten gehen über reines GFM hinaus:
 ### Mermaid-Diagramme
 
 Ein Codeblock mit der Auszeichnung `mermaid` wird zum Diagramm. GitHub
-versteht dieselben Blöcke — deshalb erscheinen die beiden Beispiele hier als
-Grafik und nicht als Quelltext. Was du siehst, zeichnet md2pdf genauso ins
-PDF.
+versteht dieselben Blöcke, deshalb steht jedes Beispiel unten zweimal: erst
+das Markdown, das du schreibst, dann das Bild, das daraus wird — hier auf
+GitHub und genauso im PDF.
+
+Du schreibst:
+
+````markdown
+```mermaid
+flowchart LR
+    B[Browser] --> G[API-Gateway]
+    G --> A[Buchungsdienst]
+    G --> I[Inventardienst]
+    A --> D[(PostgreSQL)]
+    I --> D
+    A --> Q[/Benachrichtigungen/]
+```
+````
+
+Und bekommst:
 
 ```mermaid
 flowchart LR
@@ -279,7 +295,22 @@ flowchart LR
     A --> Q[/Benachrichtigungen/]
 ```
 
-Sequenzdiagramme gehen genauso:
+Sequenzdiagramme gehen genauso. Du schreibst:
+
+````markdown
+```mermaid
+sequenceDiagram
+    participant U as Anwender
+    participant G as Gateway
+    participant B as Buchungsdienst
+    U->>G: POST /api/v1/bookings
+    G->>B: Buchung anlegen
+    B-->>G: 201 Created
+    G-->>U: Bestätigung
+```
+````
+
+Und bekommst:
 
 ```mermaid
 sequenceDiagram
