@@ -8,6 +8,18 @@ import (
 	"github.com/gstuebner/md2pdf/internal/model"
 )
 
+// bom is the UTF-8 byte order mark. Editors on Windows — PowerShell's
+// Set-Content among them — write it at the start of a file. Goldmark does not
+// treat it as whitespace, so a leading "\ufeff# Title" is not an ATX heading
+// but a paragraph: the heading would show up verbatim in the PDF and the
+// cover page would stay untitled. Every entry point therefore strips it.
+const bom = "\ufeff"
+
+// StripBOM removes a leading UTF-8 byte order mark from src.
+func StripBOM(src []byte) []byte {
+	return bytes.TrimPrefix(src, []byte(bom))
+}
+
 // PeekMeta reads only the YAML front matter of src. The caller needs a few
 // values — the style preset above all — before the full conversion runs,
 // because they decide options that Convert itself depends on. Anything that
@@ -27,7 +39,7 @@ func PeekMeta(src []byte) model.Meta {
 // frontMatterBlock returns the bytes between the opening and closing "---"
 // fence at the very start of the document.
 func frontMatterBlock(src []byte) ([]byte, bool) {
-	rest := bytes.TrimPrefix(src, []byte("\ufeff"))
+	rest := StripBOM(src)
 	const fence = "---"
 
 	lines := bytes.Split(rest, []byte("\n"))

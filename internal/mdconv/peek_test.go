@@ -1,6 +1,9 @@
 package mdconv
 
-import "testing"
+import (
+	"strings"
+	"testing"
+)
 
 func TestPeekMeta(t *testing.T) {
 	cases := []struct {
@@ -42,5 +45,36 @@ func TestPeekMetaMatchesConvert(t *testing.T) {
 
 	if peeked.Preset != res.Meta.Preset || peeked.Lang != res.Meta.Lang || peeked.Title != res.Meta.Title {
 		t.Errorf("PeekMeta = %+v, Convert = %+v", peeked, res.Meta)
+	}
+}
+
+// A UTF-8 BOM at the start of the file must not keep the first heading from
+// being recognised — otherwise "# Title" ends up verbatim in the body and the
+// cover page stays untitled.
+func TestConvertHandlesUTF8BOM(t *testing.T) {
+	const bomBytes = "\xef\xbb\xbf"
+
+	res, err := Convert([]byte(bomBytes+"# Titel\n\nText.\n"), Options{TOCDepth: 3, Loader: stubLoader{}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if res.Meta.Title != "Titel" {
+		t.Errorf("Title = %q, want %q", res.Meta.Title, "Titel")
+	}
+	if strings.Contains(string(res.BodyHTML), "# Titel") {
+		t.Errorf("heading markup leaked into the body:\n%s", res.BodyHTML)
+	}
+
+	// Front matter behind a BOM must parse as well, in Convert and in PeekMeta.
+	src := []byte(bomBytes + "---\ntitle: Aus Frontmatter\npreset: report\n---\n\n# Heading\n")
+	res, err = Convert(src, Options{TOCDepth: 3, Loader: stubLoader{}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if res.Meta.Title != "Aus Frontmatter" || res.Meta.Preset != "report" {
+		t.Errorf("front matter behind a BOM not parsed: %+v", res.Meta)
+	}
+	if got := PeekMeta(src); got.Preset != "report" {
+		t.Errorf("PeekMeta behind a BOM = %+v, want preset report", got)
 	}
 }

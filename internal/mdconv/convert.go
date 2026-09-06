@@ -58,6 +58,8 @@ func Convert(src []byte, o Options) (Result, error) {
 		o.TOCDepth = 3
 	}
 
+	src = StripBOM(src)
+
 	state := &docState{lang: o.Lang}
 	md := goldmark.New(
 		goldmark.WithExtensions(
