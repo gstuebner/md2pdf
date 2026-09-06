@@ -259,38 +259,42 @@ Drei Besonderheiten gehen über reines GFM hinaus:
   kein Titel gesetzt, wird der Alt-Text verwendet. Sind beide leer, entfällt
   die Bildunterschrift, die Abbildung bleibt aber nummeriert.
 - ` ```mermaid `-Codeblöcke werden nicht als Text, sondern als Vektorgrafik
-  gerendert. Mermaid ist mitgeliefert, das funktioniert also offline:
+  gerendert. Mermaid ist mitgeliefert, das funktioniert also offline. Siehe
+  [Mermaid-Diagramme](#mermaid-diagramme) weiter unten.
 
-  ````markdown
-  ```mermaid
-  flowchart LR
-      B[Browser] --> G[API-Gateway]
-      G --> A[Buchungsdienst]
-      G --> I[Inventardienst]
-      A --> D[(PostgreSQL)]
-      I --> D
-      A --> Q[/Benachrichtigungen/]
-  ```
-  ````
+### Mermaid-Diagramme
 
-  Sequenzdiagramme gehen genauso:
+Ein Codeblock mit der Auszeichnung `mermaid` wird zum Diagramm. GitHub
+versteht dieselben Blöcke — deshalb erscheinen die beiden Beispiele hier als
+Grafik und nicht als Quelltext. Was du siehst, zeichnet md2pdf genauso ins
+PDF.
 
-  ````markdown
-  ```mermaid
-  sequenceDiagram
-      participant U as Anwender
-      participant G as Gateway
-      participant B as Buchungsdienst
-      U->>G: POST /api/v1/bookings
-      G->>B: Buchung anlegen
-      B-->>G: 201 Created
-      G-->>U: Bestätigung
-  ```
-  ````
+```mermaid
+flowchart LR
+    B[Browser] --> G[API-Gateway]
+    G --> A[Buchungsdienst]
+    G --> I[Inventardienst]
+    A --> D[(PostgreSQL)]
+    I --> D
+    A --> Q[/Benachrichtigungen/]
+```
 
-  Das Diagramm übernimmt die Farben des Presets (`--accent`, `--ink`,
-  `--rule`) und passt damit zum übrigen Dokument. In `testdata/showcase.md`
-  stehen beide Beispiele im Zusammenhang.
+Sequenzdiagramme gehen genauso:
+
+```mermaid
+sequenceDiagram
+    participant U as Anwender
+    participant G as Gateway
+    participant B as Buchungsdienst
+    U->>G: POST /api/v1/bookings
+    G->>B: Buchung anlegen
+    B-->>G: 201 Created
+    G-->>U: Bestätigung
+```
+
+Im PDF übernimmt das Diagramm die Farben des Presets (`--accent`, `--ink`,
+`--rule`) und passt damit zum übrigen Dokument. In `testdata/showcase.md`
+stehen beide Beispiele im Zusammenhang.
 
 ## Kapitelnummerierung
 

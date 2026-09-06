@@ -253,38 +253,41 @@ Three features go beyond plain GFM:
   set, the alt text is used instead. If both are empty, the caption is
   omitted, but the figure stays numbered.
 - ` ```mermaid ` code blocks are rendered as vector graphics rather than as
-  text. Mermaid is bundled, so this works offline:
+  text. Mermaid is bundled, so this works offline. See
+  [Mermaid diagrams](#mermaid-diagrams) below.
 
-  ````markdown
-  ```mermaid
-  flowchart LR
-      B[Browser] --> G[API-Gateway]
-      G --> A[Booking service]
-      G --> I[Inventory service]
-      A --> D[(PostgreSQL)]
-      I --> D
-      A --> Q[/Notifications/]
-  ```
-  ````
+### Mermaid diagrams
 
-  Sequence diagrams work the same way:
+A fenced block tagged `mermaid` becomes a diagram. GitHub understands the same
+blocks, which is why the two examples below show up as graphics here and not
+as source code — what you see is what md2pdf draws into the PDF.
 
-  ````markdown
-  ```mermaid
-  sequenceDiagram
-      participant U as User
-      participant G as Gateway
-      participant B as Booking service
-      U->>G: POST /api/v1/bookings
-      G->>B: create booking
-      B-->>G: 201 Created
-      G-->>U: confirmation
-  ```
-  ````
+```mermaid
+flowchart LR
+    B[Browser] --> G[API-Gateway]
+    G --> A[Booking service]
+    G --> I[Inventory service]
+    A --> D[(PostgreSQL)]
+    I --> D
+    A --> Q[/Notifications/]
+```
 
-  The diagram picks up the preset's colours (`--accent`, `--ink`, `--rule`),
-  so it fits the rest of the document. `testdata/showcase.md` contains both
-  examples in context.
+Sequence diagrams work the same way:
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant G as Gateway
+    participant B as Booking service
+    U->>G: POST /api/v1/bookings
+    G->>B: create booking
+    B-->>G: 201 Created
+    G-->>U: confirmation
+```
+
+In the PDF the diagram picks up the preset's colours (`--accent`, `--ink`,
+`--rule`), so it fits the rest of the document. `testdata/showcase.md`
+contains both examples in context.
 
 ## Chapter numbering
 
