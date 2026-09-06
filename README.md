@@ -87,11 +87,11 @@ editing it and tagging the commit. `md2pdf --version` and the last line of
 `md2pdf --help` then report it:
 
 ```
-md2pdf 1.1.1 · Gregor Stübner & Claude (Anthropic)
+md2pdf 1.1.2 · Gregor Stübner & Claude (Anthropic)
 ```
 
 A plain `go build .` bypasses the linker flag and falls back to the module
-version the Go toolchain recorded (`go install …@v1.1.1`), or to `dev` when
+version the Go toolchain recorded (`go install …@v1.1.2`), or to `dev` when
 there is none.
 
 Other targets: `make test` (Go tests), `make vet` (`go vet`), `make fmt`
@@ -177,7 +177,7 @@ Metadata precedence below).
 | `company`  | Publisher/company, appears on the cover page and, if set, in the footer.   |
 | `date`     | Display form of the date, e.g. `2026-09-05`. If missing, today's date is inserted (`YYYY-MM-DD`, or `DD.MM.YYYY` when the document language is German). |
 | `logo`     | Path to an image file, relative to the Markdown file, for the cover page. |
-| `lang`     | Language of the generated text snippets (callout titles, "Page/of", table-of-contents heading, figure captions). Supports `de` and `en`; without it md2pdf uses the locale from `LC_ALL`/`LANG` and falls back to `en`. |
+| `lang`     | Language of the generated text snippets (callout titles, "Page/of", table-of-contents heading, figure captions). Supports `de` and `en`; without it md2pdf uses the locale from `LC_ALL`/`LANG`, on Windows the user's default locale, and falls back to `en`. |
 | `preset`   | Style preset for this document, see [Presets](#presets). `--preset` overrides it. |
 
 Example (based on `testdata/showcase.md`):
@@ -215,7 +215,7 @@ preset: modern
 | `--company`              | empty                           | Overrides the publisher from the frontmatter.                      |
 | `--date`                 | empty                           | Overrides the date from the frontmatter.                           |
 | `--logo`                 | empty                           | Overrides the logo path from the frontmatter.                      |
-| `--lang`                 | locale, else `en`               | Language of the labels (`de` or `en`): callout titles, table-of-contents heading, figure captions, footer words. Overrides the frontmatter. |
+| `--lang`                 | system locale, else `en`        | Language of the labels (`de` or `en`): callout titles, table-of-contents heading, figure captions, footer words. Overrides the frontmatter. |
 | `-p, --preset`           | `classic`                       | Style preset, see [Presets](#presets). An unambiguous prefix is enough (`-p c`). Overrides a `preset` in the frontmatter. |
 | `--list-presets`         | `false`                         | Lists the built-in presets with a one-line description and exits.  |
 | `--no-toc`               | preset                          | No table of contents.                                              |

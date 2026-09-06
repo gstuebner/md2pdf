@@ -93,11 +93,11 @@ sie ist die einzige Quelle für die Versionsnummer. Ein Release heißt also:
 Zeile von `md2pdf --help` melden sie dann:
 
 ```
-md2pdf 1.1.1 · Gregor Stübner & Claude (Anthropic)
+md2pdf 1.1.2 · Gregor Stübner & Claude (Anthropic)
 ```
 
 Ein nacktes `go build .` umgeht das Linker-Flag und fällt auf die
-Modulversion zurück, die die Go-Toolchain vermerkt hat (`go install …@v1.1.1`),
+Modulversion zurück, die die Go-Toolchain vermerkt hat (`go install …@v1.1.2`),
 sonst auf `dev`.
 
 Weitere Ziele: `make test` (Go-Tests), `make vet` (`go vet`), `make fmt`
@@ -183,7 +183,7 @@ Metadatenpräzedenz).
 | `company`  | Herausgeber/Firma, erscheint auf dem Deckblatt und, falls gesetzt, in der Fußzeile. |
 | `date`     | Anzeigeform des Datums, z. B. `05.09.2026`. Fehlt es, wird das heutige Datum eingesetzt — bei `lang: de` als `TT.MM.JJJJ`, sonst als `JJJJ-MM-TT`. |
 | `logo`     | Pfad zu einer Bilddatei, relativ zur Markdown-Datei, für das Deckblatt.    |
-| `lang`     | Sprache der generierten Textbausteine (Callout-Titel, „Seite/von", Überschrift des Inhaltsverzeichnisses, Bildunterschriften). Unterstützt `de` und `en`; ohne Angabe zieht md2pdf die Locale aus `LC_ALL`/`LANG` heran und fällt auf `en` zurück. |
+| `lang`     | Sprache der generierten Textbausteine (Callout-Titel, „Seite/von", Überschrift des Inhaltsverzeichnisses, Bildunterschriften). Unterstützt `de` und `en`; ohne Angabe zieht md2pdf die Locale aus `LC_ALL`/`LANG` heran, unter Windows die Standard-Locale des Benutzers, und fällt auf `en` zurück. |
 | `preset`   | Style-Preset für dieses Dokument, siehe [Presets](#presets). `--preset` überschreibt es. |
 
 Beispiel (angelehnt an `testdata/showcase.md`):
@@ -221,7 +221,7 @@ preset: modern
 | `--company`              | leer                           | Überschreibt den Herausgeber aus dem Frontmatter.                  |
 | `--date`                 | leer                           | Überschreibt das Datum aus dem Frontmatter.                        |
 | `--logo`                 | leer                           | Überschreibt den Logo-Pfad aus dem Frontmatter.                    |
-| `--lang`                 | Locale, sonst `en`             | Sprache der Beschriftungen (`de` oder `en`): Callout-Titel, Überschrift des Inhaltsverzeichnisses, Bildunterschriften, Wörter in der Fußzeile. Überschreibt das Frontmatter. |
+| `--lang`                 | System-Locale, sonst `en`      | Sprache der Beschriftungen (`de` oder `en`): Callout-Titel, Überschrift des Inhaltsverzeichnisses, Bildunterschriften, Wörter in der Fußzeile. Überschreibt das Frontmatter. |
 | `-p, --preset`           | `classic`                      | Style-Preset, siehe [Presets](#presets). Ein eindeutiger Präfix genügt (`-p c`). Überschreibt ein `preset` im Frontmatter. |
 | `--list-presets`         | `false`                        | Listet die eingebauten Presets mit Kurzbeschreibung und beendet sich. |
 | `--no-toc`               | Preset                         | Kein Inhaltsverzeichnis.                                           |
