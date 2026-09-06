@@ -93,11 +93,11 @@ sie ist die einzige Quelle für die Versionsnummer. Ein Release heißt also:
 Zeile von `md2pdf --help` melden sie dann:
 
 ```
-md2pdf 1.1.0 · Gregor Stübner & Claude (Anthropic)
+md2pdf 1.1.1 · Gregor Stübner & Claude (Anthropic)
 ```
 
 Ein nacktes `go build .` umgeht das Linker-Flag und fällt auf die
-Modulversion zurück, die die Go-Toolchain vermerkt hat (`go install …@v1.1.0`),
+Modulversion zurück, die die Go-Toolchain vermerkt hat (`go install …@v1.1.1`),
 sonst auf `dev`.
 
 Weitere Ziele: `make test` (Go-Tests), `make vet` (`go vet`), `make fmt`
