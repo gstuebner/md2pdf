@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"runtime/debug"
 	"strings"
 	"time"
 
@@ -15,15 +16,33 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// version holds the program version, overridable via -ldflags -X.
+// version holds the program version. build.sh and the Makefile set it from
+// the VERSION file at the repository root via -ldflags -X; a plain "go build"
+// leaves it at "dev" and resolveVersion() then falls back to the module
+// version the toolchain recorded.
 var version = "dev"
+
+// resolveVersion returns the version to display. A binary built with
+// -ldflags -X reports exactly what was baked in. Without that — "go install
+// github.com/gstuebner/md2pdf@v1.2.0", for instance — the module version from
+// the build info is still better than "dev".
+func resolveVersion() string {
+	if version != "dev" {
+		return version
+	}
+	info, ok := debug.ReadBuildInfo()
+	if !ok || info.Main.Version == "" || info.Main.Version == "(devel)" {
+		return version
+	}
+	return info.Main.Version
+}
 
 // authors is shown in the help footer and alongside --version.
 const authors = "Gregor Stübner & Claude (Anthropic)"
 
 // credits is the one-line footer under the help output.
 func credits() string {
-	return fmt.Sprintf("md2pdf %s · %s", version, authors)
+	return fmt.Sprintf("md2pdf %s · %s", resolveVersion(), authors)
 }
 
 // errUsage marks errors caused by invalid CLI arguments (exit code 2).

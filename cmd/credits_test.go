@@ -14,7 +14,7 @@ func TestHelpShowsVersionAndAuthors(t *testing.T) {
 
 	out := stdout.String()
 	last := lastNonEmptyLine(out)
-	if !strings.Contains(last, "md2pdf "+version) {
+	if !strings.Contains(last, "md2pdf "+resolveVersion()) {
 		t.Errorf("last help line %q does not carry the version", last)
 	}
 	if !strings.Contains(last, authors) {
@@ -29,8 +29,20 @@ func TestVersionFlagShowsVersionAndAuthors(t *testing.T) {
 	}
 
 	out := strings.TrimSpace(stdout.String())
-	if !strings.Contains(out, version) || !strings.Contains(out, authors) {
+	if !strings.Contains(out, resolveVersion()) || !strings.Contains(out, authors) {
 		t.Errorf("--version printed %q, want version and authors", out)
+	}
+}
+
+// A release build bakes the version in via -ldflags; without that the module
+// version from the build info stands in. Either way the credits line must
+// carry something, never an empty field.
+func TestResolveVersionIsNeverEmpty(t *testing.T) {
+	if resolveVersion() == "" {
+		t.Error("resolveVersion() returned an empty string")
+	}
+	if !strings.Contains(credits(), "md2pdf "+resolveVersion()+" ") {
+		t.Errorf("credits() = %q, want it to start with the version", credits())
 	}
 }
 

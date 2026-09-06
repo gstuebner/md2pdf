@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Builds md2pdf for Linux and Windows (amd64 each) into dist/.
 #
-#   ./build.sh                 # version "dev"
+#   ./build.sh                 # version from the VERSION file
 #   ./build.sh 1.2.0           # version 1.2.0
 #   VERSION=1.2.0 ./build.sh   # the same, via the environment
 #
@@ -13,7 +13,13 @@ set -euo pipefail
 
 cd "$(dirname "$0")"
 
-VERSION="${1:-${VERSION:-dev}}"
+# The VERSION file at the repository root is the single source of truth; an
+# argument or the environment overrides it for one-off builds.
+FILE_VERSION="dev"
+if [ -r VERSION ]; then
+  FILE_VERSION="$(tr -d '[:space:]' < VERSION)"
+fi
+VERSION="${1:-${VERSION:-$FILE_VERSION}}"
 OUTDIR="dist"
 PKG="github.com/gstuebner/md2pdf"
 LDFLAGS="-s -w -X ${PKG}/cmd.version=${VERSION}"

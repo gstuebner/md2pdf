@@ -54,7 +54,7 @@ For the most common case — one build each for Linux and Windows — there's
 statically linked binaries under `dist/`:
 
 ```fish
-./build.sh          # version "dev"
+./build.sh          # version from the VERSION file
 ./build.sh 1.2.0    # version 1.2.0
 ```
 
@@ -81,8 +81,18 @@ overridden:
 make build VERSION=2.4.0
 ```
 
-Without it, `md2pdf --version` reports `dev`. The build does not derive the
-version from Git history, so release builds pass it explicitly.
+Without it, both build paths read the `VERSION` file at the repository root —
+that file is the single source of truth for the version, so a release means
+editing it and tagging the commit. `md2pdf --version` and the last line of
+`md2pdf --help` then report it:
+
+```
+md2pdf 1.0.0 · Gregor Stübner & Claude (Anthropic)
+```
+
+A plain `go build .` bypasses the linker flag and falls back to the module
+version the Go toolchain recorded (`go install …@v1.0.0`), or to `dev` when
+there is none.
 
 Other targets: `make test` (Go tests), `make vet` (`go vet`), `make fmt`
 (checks with `gofmt -l` whether any files are unformatted), `make clean`

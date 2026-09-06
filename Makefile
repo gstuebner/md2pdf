@@ -1,10 +1,11 @@
 # Makefile for md2pdf.
 #
-# VERSION has a fixed default and can be overridden on the command line:
+# The version comes from the VERSION file at the repository root and can be
+# overridden on the command line:
 #
 #   make build VERSION=2.4.0
 
-VERSION ?= dev
+VERSION ?= $(shell tr -d '[:space:]' < VERSION 2>/dev/null || echo dev)
 LDFLAGS := -s -w -X github.com/gstuebner/md2pdf/cmd.version=$(VERSION)
 
 DIST := dist

@@ -60,7 +60,7 @@ Für den häufigsten Fall — je eine Fassung für Linux und Windows — gibt es
 Binaries statisch gelinkt unter `dist/` ab:
 
 ```fish
-./build.sh          # Version "dev"
+./build.sh          # Version aus der Datei VERSION
 ./build.sh 1.2.0    # Version 1.2.0
 ```
 
@@ -87,8 +87,18 @@ Das erzeugt `dist/md2pdf_linux_amd64`, `dist/md2pdf_linux_arm64` und
 make build VERSION=2.4.0
 ```
 
-Ohne Angabe steht in `md2pdf --version` `dev`. Der Build leitet die Version
-nicht aus dem Git-Verlauf ab, Release-Builds geben sie deshalb ausdrücklich mit.
+Ohne Angabe lesen beide Build-Wege die Datei `VERSION` im Wurzelverzeichnis —
+sie ist die einzige Quelle für die Versionsnummer. Ein Release heißt also:
+`VERSION` anpassen und den Commit taggen. `md2pdf --version` und die letzte
+Zeile von `md2pdf --help` melden sie dann:
+
+```
+md2pdf 1.0.0 · Gregor Stübner & Claude (Anthropic)
+```
+
+Ein nacktes `go build .` umgeht das Linker-Flag und fällt auf die
+Modulversion zurück, die die Go-Toolchain vermerkt hat (`go install …@v1.0.0`),
+sonst auf `dev`.
 
 Weitere Ziele: `make test` (Go-Tests), `make vet` (`go vet`), `make fmt`
 (prüft mit `gofmt -l`, ob Dateien ungeformt sind), `make clean` (entfernt
