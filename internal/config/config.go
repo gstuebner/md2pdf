@@ -12,26 +12,46 @@ import (
 type Paper struct{ WidthIn, HeightIn float64 }
 type Margins struct{ TopIn, RightIn, BottomIn, LeftIn float64 }
 
+// Explicit records which preset-owned options the user set on the command
+// line. A preset never overwrites a field marked here.
+type Explicit struct {
+	Cover          bool
+	TOC            bool
+	TOCDepth       bool
+	NumberHeadings bool
+	ChapterPages   bool
+	Landscape      bool
+	Header         bool
+	Footer         bool
+	Margins        bool
+}
+
 type Options struct {
 	Input, Output string
-	Meta          model.Meta // aus CLI-Flags; überschreibt Frontmatter feldweise
+	Meta          model.Meta // from CLI flags; overrides front matter field by field
 	ExtraCSS      []string
 
-	TOC      bool // Default true
-	TOCDepth int  // Default 3
-	Cover    bool // Default true
+	// Preset is the name of the built-in style preset, see preset.go. Empty
+	// means "not decided yet"; pipeline.Run resolves it against the front
+	// matter and falls back to DefaultPreset.
+	Preset   string
+	Explicit Explicit
 
-	NumberHeadings bool // Default true  -> <body class="numbered">
-	ForceNumbering bool // Default false -> Erkennung eigener Kapitelnummern übergehen
-	ChapterPages   bool // Default false -> <body class="chapters">
+	TOC      bool // preset default
+	TOCDepth int  // preset default
+	Cover    bool // preset default
+
+	NumberHeadings bool // preset default -> <body class="numbered">
+	ForceNumbering bool // Default false  -> skip detection of author-supplied chapter numbers
+	ChapterPages   bool // preset default -> <body class="chapters">
 
 	Paper     Paper
 	Landscape bool
 	Margins   Margins
 
-	Header     bool   // Default true
-	Footer     bool   // Default true
-	HeaderFile string // optionales eigenes Chromium-Template
+	Header     bool   // preset default
+	Footer     bool   // preset default
+	HeaderFile string // optional custom Chromium template
 	FooterFile string
 
 	BrowserPath string
@@ -39,7 +59,7 @@ type Options struct {
 
 	HTMLOut string
 	Timeout time.Duration // Default 60s
-	Outline bool          // PDF-Lesezeichen, Default true
+	Outline bool          // PDF bookmarks, Default true
 	Quiet   bool
 }
 

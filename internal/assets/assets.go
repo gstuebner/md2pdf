@@ -23,9 +23,17 @@ func Template(name string) ([]byte, error) {
 	return b, nil
 }
 
-// Theme returns the concatenated contents of fonts.css, default.css, and code.css in that order.
-func Theme() ([]byte, error) {
-	files := []string{"theme/fonts.css", "theme/default.css", "theme/code.css"}
+// Theme returns the stylesheet for the given preset: fonts.css, base.css, the
+// preset stylesheet and code.css, concatenated in that order. Later files may
+// override earlier ones, so the preset decides colours, fonts and decoration
+// while base.css keeps the structure.
+func Theme(preset string) ([]byte, error) {
+	files := []string{
+		"theme/fonts.css",
+		"theme/base.css",
+		"theme/presets/" + preset + ".css",
+		"theme/code.css",
+	}
 	var buf bytes.Buffer
 	for _, file := range files {
 		data, err := FS.ReadFile(file)

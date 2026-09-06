@@ -9,47 +9,47 @@ func TestDetectManualNumbering(t *testing.T) {
 		want bool
 	}{
 		{
-			name: "eigene Nummern mit Punkt",
+			name: "own numbers with a dot",
 			src:  "## 1. Einleitung\n\n## 2. Installation\n\n## 3. Betrieb\n",
 			want: true,
 		},
 		{
-			name: "eigene Nummern ohne Punkt",
+			name: "own numbers without a dot",
 			src:  "## 1 Einleitung\n\n## 2 Installation\n",
 			want: true,
 		},
 		{
-			name: "eigene Nummern mit Klammer",
+			name: "own numbers with a bracket",
 			src:  "## 1) Einleitung\n\n## 2) Installation\n",
 			want: true,
 		},
 		{
-			name: "mehrstellige Gliederung",
+			name: "multi-level outline",
 			src:  "## 1.1 Einleitung\n\n## 1.2 Installation\n",
 			want: true,
 		},
 		{
-			name: "ohne Nummern",
+			name: "no numbers",
 			src:  "## Einleitung\n\n## Installation\n\n## Betrieb\n",
 			want: false,
 		},
 		{
-			name: "Jahreszahlen sind keine Gliederung",
+			name: "years are not an outline",
 			src:  "## 2025 im Rückblick\n\n## 2026 im Ausblick\n",
 			want: false,
 		},
 		{
-			name: "einzelne nummerierte Überschrift reicht nicht",
+			name: "a single numbered heading is not enough",
 			src:  "## 1. Einleitung\n\n## Installation\n\n## Betrieb\n\n## Anhang\n",
 			want: false,
 		},
 		{
-			name: "nur eine Überschrift insgesamt",
+			name: "only one heading in total",
 			src:  "## 1. Einleitung\n",
 			want: false,
 		},
 		{
-			name: "Unterkapitel zählen nicht mit",
+			name: "sub-chapters do not count",
 			src:  "## Einleitung\n\n### 1. Schritt\n\n### 2. Schritt\n\n## Installation\n",
 			want: false,
 		},
@@ -69,7 +69,7 @@ func TestDetectManualNumbering(t *testing.T) {
 }
 
 func TestManualNumberingIgnoresLeadingTitle(t *testing.T) {
-	// Die erste H1 wandert aufs Deckblatt und darf die Erkennung nicht stören.
+	// The first H1 moves to the cover page and must not confuse the detection.
 	res, err := Convert([]byte("# Handbuch\n\n## 1. Eins\n\n## 2. Zwei\n"), Options{Loader: stubLoader{}})
 	if err != nil {
 		t.Fatal(err)

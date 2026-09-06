@@ -1,0 +1,112 @@
+/* Preset "technical" — dense manual layout. Smaller type, tighter rhythm,
+   emphasised code blocks, a four-level table of contents and every chapter on
+   a fresh page. */
+
+:root {
+  /* Accent */
+  --accent:        #0f766e;
+  --accent-strong: #0d5f59;
+  --accent-soft:   #ecfdf5;
+
+  /* Text */
+  --ink:        #111827;
+  --ink-2:      #1f2937;
+  --ink-muted:  #4b5563;
+  --ink-faint:  #9ca3af;
+
+  /* Surfaces and rules */
+  --page:        #ffffff;
+  --surface:     #f4f6f8;
+  --surface-2:   #eceff2;
+  --rule:        #dfe3e8;
+  --rule-strong: #c3c9d0;
+
+  /* Callouts: bar / fill / outline */
+  --note-line:      #0f766e;  --note-bg:      #f0fdfa;  --note-edge:      #b8e6e0;
+  --tip-line:       #15803d;  --tip-bg:       #f2fbf4;  --tip-edge:       #bbe6c6;
+  --important-line: #6d28d9;  --important-bg: #f6f3fd;  --important-edge: #d5c9f2;
+  --warning-line:   #a16207;  --warning-bg:   #fefaec;  --warning-edge:   #ecd8a0;
+  --caution-line:   #b91c1c;  --caution-bg:   #fdf1f1;  --caution-edge:   #efc2c2;
+
+  /* Typography */
+  --font-body: "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "JetBrains Mono", "Cascadia Mono", Consolas, "DejaVu Sans Mono", monospace;
+  --size-body: 10pt;
+  --leading:   1.5;
+
+  --h1-size: 18pt;
+  --h2-size: 14.5pt;
+  --h3-size: 11.5pt;
+  --h4-size: 10.5pt;
+
+  /* Vertical rhythm */
+  --space:   7pt;
+  --space-2: 13pt;
+  --space-3: 20pt;
+
+  --radius: 3pt;
+  --bar-offset: 10pt;
+}
+
+/* Accent bar next to chapter headings; each chapter starts on its own page,
+   so the top margin can be modest. */
+.doc h2 {
+  padding-left: var(--bar-offset);
+  border-left: 4pt solid var(--accent);
+}
+
+/* Round, muted bullets */
+.doc ul { list-style: none; }
+.doc ul > li::before {
+  content: "";
+  position: absolute;
+  left: -11pt;
+  top: 0.58em;
+  width: 3.5pt;
+  height: 3.5pt;
+  border-radius: 50%;
+  background: var(--rule-strong);
+}
+.doc ul > li:has(> input[type="checkbox"])::before { content: none; }
+
+/* Code is the point of this preset: darker frame, language badge, tighter set */
+.codeblock {
+  background: var(--surface-2);
+  border: 0.75pt solid var(--rule-strong);
+}
+
+.codeblock pre { font-size: 8.4pt; line-height: 1.45; padding: 9pt 11pt; }
+
+.codeblock::after {
+  content: attr(data-lang);
+  position: absolute;
+  top: 0; right: 0;
+  padding: 3pt 8pt;
+  font-size: 7pt;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  pointer-events: none;
+}
+
+.codeblock[data-lang=""]::after,
+.codeblock:not([data-lang])::after,
+.codeblock[data-lang="text"]::after,
+.codeblock[data-lang="txt"]::after,
+.codeblock[data-lang="plain"]::after,
+.codeblock[data-lang="plaintext"]::after,
+.codeblock[data-lang="output"]::after { content: none; }
+
+/* Row rules instead of zebra stripes — easier to follow in wide tables */
+.doc table { font-size: 9pt; }
+.doc td { border-bottom: 0.5pt solid var(--rule); }
+.doc table :is(th, td):first-child { padding-left: 0; }
+.doc table :is(th, td):last-child  { padding-right: 0; }
+
+/* Numbered figure captions */
+.figure figcaption::before {
+  content: var(--label-figure) " " counter(figure) ": ";
+  font-weight: 640;
+  color: var(--ink-2);
+}

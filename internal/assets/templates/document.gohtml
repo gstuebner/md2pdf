@@ -1,30 +1,30 @@
 <!doctype html>
-<html lang="{{with .Doc.Meta.Lang}}{{.}}{{else}}de{{end}}">
+<html lang="{{.Lang}}">
 <head>
 <meta charset="utf-8">
-<title>{{with .Doc.Meta.Title}}{{.}}{{else}}Dokument{{end}}</title>
+<title>{{with .Doc.Meta.Title}}{{.}}{{else}}{{$.Labels.Document}}{{end}}</title>
 <style>{{.CSS}}</style>
 </head>
-<body class="{{if .NumberHeadings}}numbered {{end}}{{if .ChapterPages}}chapters{{end}}">
+<body class="{{.BodyClass}}">
 
 {{if .ShowCover}}
 <section class="cover">
   <div class="cover-head">
-    <div class="cover-kicker">{{with .Doc.Meta.Kicker}}{{.}}{{else}}Dokumentation{{end}}</div>
+    <div class="cover-kicker">{{with .Doc.Meta.Kicker}}{{.}}{{else}}{{$.Labels.Kicker}}{{end}}</div>
     {{with .Doc.Meta.Logo}}<img class="cover-logo" src="{{.}}" alt="">{{end}}
   </div>
 
   <div class="cover-body">
-    <h1 class="cover-title">{{with .Doc.Meta.Title}}{{.}}{{else}}Ohne Titel{{end}}</h1>
+    <h1 class="cover-title">{{with .Doc.Meta.Title}}{{.}}{{else}}{{$.Labels.Untitled}}{{end}}</h1>
     {{with .Doc.Meta.Subtitle}}<p class="cover-subtitle">{{.}}</p>{{end}}
   </div>
 
   <div class="cover-foot">
     <dl class="cover-meta">
-      {{with .Doc.Meta.Version}}<div><dt>Version</dt><dd>{{.}}</dd></div>{{end}}
-      {{with .Doc.Meta.Date}}<div><dt>Stand</dt><dd>{{.}}</dd></div>{{end}}
-      {{with .Doc.Meta.Author}}<div><dt>Autor</dt><dd>{{.}}</dd></div>{{end}}
-      {{with .Doc.Meta.Company}}<div><dt>Herausgeber</dt><dd>{{.}}</dd></div>{{end}}
+      {{with .Doc.Meta.Version}}<div><dt>{{$.Labels.Version}}</dt><dd>{{.}}</dd></div>{{end}}
+      {{with .Doc.Meta.Date}}<div><dt>{{$.Labels.Date}}</dt><dd>{{.}}</dd></div>{{end}}
+      {{with .Doc.Meta.Author}}<div><dt>{{$.Labels.Author}}</dt><dd>{{.}}</dd></div>{{end}}
+      {{with .Doc.Meta.Company}}<div><dt>{{$.Labels.Publisher}}</dt><dd>{{.}}</dd></div>{{end}}
     </dl>
   </div>
 </section>
@@ -32,7 +32,7 @@
 
 {{if and .ShowTOC .Doc.TOC}}
 <nav class="toc">
-  <h2 class="toc-heading">{{.TOCTitle}}</h2>
+  <h2 class="toc-heading">{{.Labels.Contents}}</h2>
   <ul class="toc-list">
     {{range .Doc.TOC}}<li class="toc-l{{.Level}}"><a href="#{{.ID}}">{{.Text}}</a></li>
     {{end}}

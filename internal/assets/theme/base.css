@@ -1,56 +1,33 @@
-/* md2pdf — Standard-Theme "technisch-klar".
-   Alle Farben, Abstaende und Schriftgroessen liegen als Custom Properties auf :root.
-   Eigenes Branding braucht daher meist nur eine kleine --css-Datei, die diese Werte
-   ueberschreibt, kein Nachbauen der Regeln. */
+/* md2pdf base stylesheet.
+
+   This file carries the structure that every preset shares: layout, page
+   handling, counters, and the mechanics behind cover, table of contents,
+   callouts, tables, code blocks and figures.
+
+   Everything visual — colours, fonts, sizes, spacing — comes from custom
+   properties that the preset stylesheet in theme/presets/ defines. A preset is
+   appended after this file and may therefore also override single rules.
+
+   Load order: fonts.css -> base.css -> presets/<name>.css -> code.css -> --css */
 
 :root {
-  /* Akzent */
-  --accent:        #2563eb;
-  --accent-strong: #1d4ed8;
-  --accent-soft:   #eff6ff;
+  /* Captions — a preset or a --css file can translate these. */
+  --label-figure: "Figure";
+  --label-table:  "Table";
 
-  /* Text */
-  --ink:        #0f172a;
-  --ink-2:      #1e293b;
-  --ink-muted:  #475569;
-  --ink-faint:  #94a3b8;
+  /* Heading scale; presets normally redefine all four. */
+  --h1-size: 21pt;
+  --h2-size: 16pt;
+  --h3-size: 12.5pt;
+  --h4-size: 11pt;
 
-  /* Flaechen und Linien */
-  --page:        #ffffff;
-  --surface:     #f8fafc;
-  --surface-2:   #f1f5f9;
-  --rule:        #e2e8f0;
-  --rule-strong: #cbd5e1;
-
-  /* Callouts: Rand / Flaeche / Kontur */
-  --note-line:      #2563eb;  --note-bg:      #eff6ff;  --note-edge:      #bfdbfe;
-  --tip-line:       #059669;  --tip-bg:       #ecfdf5;  --tip-edge:       #a7f3d0;
-  --important-line: #7c3aed;  --important-bg: #f5f3ff;  --important-edge: #ddd6fe;
-  --warning-line:   #b45309;  --warning-bg:   #fffbeb;  --warning-edge:   #fde68a;
-  --caution-line:   #dc2626;  --caution-bg:   #fef2f2;  --caution-edge:   #fecaca;
-
-  /* Typografie */
-  --font-body: "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
-  --font-mono: "JetBrains Mono", "Cascadia Mono", "Consolas", "DejaVu Sans Mono", monospace;
-  --size-body: 10.5pt;
-  --leading:   1.62;
-
-  /* Vertikaler Rhythmus */
-  --space:   9pt;
-  --space-2: 18pt;
-  --space-3: 27pt;
-
-  --radius: 4pt;
-
-  /* Abstand zwischen Akzentleiste und Text an H2 */
+  /* Distance between an accent bar and the heading text. */
   --bar-offset: 12pt;
 
-  /* Beschriftungen — hier umstellen fuer andere Sprachen */
-  --label-figure: "Abbildung";
-  --label-table:  "Tabelle";
+  --radius: 4pt;
 }
 
-/* ---------------------------------------------------------------- Grundlagen */
+/* ---------------------------------------------------------------- Basics */
 
 *, *::before, *::after { box-sizing: border-box; }
 
@@ -66,9 +43,9 @@ body {
   hyphens: auto;
 }
 
-body:lang(en) { --label-figure: "Figure"; --label-table: "Table"; }
+body:lang(de) { --label-figure: "Abbildung"; --label-table: "Tabelle"; }
 
-/* ------------------------------------------------------------------ Deckblatt */
+/* ------------------------------------------------------------------ Cover */
 
 .cover {
   display: flex;
@@ -140,7 +117,7 @@ body:lang(en) { --label-figure: "Figure"; --label-table: "Table"; }
 .cover-meta dt { font-weight: 600; color: var(--ink-faint); }
 .cover-meta dd { margin: 0; color: var(--ink-2); }
 
-/* --------------------------------------------------------- Inhaltsverzeichnis */
+/* ------------------------------------------------------- Table of contents */
 
 .toc { break-after: page; counter-reset: toc2; }
 
@@ -194,7 +171,7 @@ body.numbered .toc-l3 > a::before {
   font-variant-numeric: tabular-nums;
 }
 
-/* ------------------------------------------------------------ Ueberschriften */
+/* --------------------------------------------------------------- Headings */
 
 .doc { counter-reset: h2 figure table; }
 
@@ -208,20 +185,18 @@ body.numbered .toc-l3 > a::before {
   hyphens: none;
 }
 
-.doc h1 { font-size: 21pt; margin: var(--space-3) 0 var(--space); }
+.doc h1 { font-size: var(--h1-size); margin: var(--space-3) 0 var(--space); }
 
 .doc h2 {
-  font-size: 16pt;
+  font-size: var(--h2-size);
   margin: var(--space-3) 0 var(--space);
-  padding-left: var(--bar-offset);
-  border-left: 4pt solid var(--accent);
   counter-increment: h2;
   counter-reset: h3 figure table;
 }
 
-.doc h3 { font-size: 12.5pt; margin: var(--space-2) 0 6pt; counter-increment: h3; counter-reset: h4; }
-.doc h4 { font-size: 11pt; margin: var(--space-2) 0 4pt; color: var(--ink-2); counter-increment: h4; }
-.doc h5, .doc h6 { font-size: 10.5pt; margin: var(--space) 0 3pt; color: var(--ink-muted); }
+.doc h3 { font-size: var(--h3-size); margin: var(--space-2) 0 6pt; counter-increment: h3; counter-reset: h4; }
+.doc h4 { font-size: var(--h4-size); margin: var(--space-2) 0 4pt; color: var(--ink-2); counter-increment: h4; }
+.doc h5, .doc h6 { font-size: var(--size-body); margin: var(--space) 0 3pt; color: var(--ink-muted); }
 
 .doc > :first-child { margin-top: 0; }
 
@@ -245,15 +220,15 @@ body.numbered .doc h4::before {
   font-variant-numeric: tabular-nums;
 }
 
-/* Kapitel auf neuer Seite beginnen: <body class="chapters"> bzw. Utility-Klasse */
+/* Start each chapter on a fresh page: <body class="chapters"> or the utility class */
 body.chapters .doc h2 { break-before: page; }
 body.chapters .doc > h2:first-child { break-before: auto; }
 .new-page { break-before: page; }
 
-/* Anker sollen im PDF nicht am Seitenkopf kleben */
+/* Anchors must not stick to the top of a printed page */
 .doc :is(h1, h2, h3, h4, h5, h6) > a.anchor { display: none; }
 
-/* -------------------------------------------------------------- Fliesstext */
+/* ------------------------------------------------------------- Body text */
 
 .doc p { margin: 0 0 var(--space); orphans: 3; widows: 3; }
 
@@ -270,20 +245,9 @@ body.chapters .doc > h2:first-child { break-before: auto; }
 .doc li { margin: 0 0 3pt; orphans: 2; widows: 2; }
 .doc li > ul, .doc li > ol { margin-top: 3pt; }
 .doc ol { list-style: decimal; }
-.doc ul { list-style: none; }
-
+.doc ul { list-style: disc; }
 .doc ul > li { position: relative; }
-.doc ul > li::before {
-  content: "";
-  position: absolute;
-  left: -12pt;
-  top: 0.58em;
-  width: 4pt;
-  height: 4pt;
-  border-radius: 50%;
-  background: var(--rule-strong);
-}
-.doc ul > li:has(> input[type="checkbox"])::before { content: none; }
+.doc ul > li:has(> input[type="checkbox"]) { list-style: none; }
 
 .doc input[type="checkbox"] {
   appearance: none;
@@ -303,7 +267,7 @@ body.chapters .doc > h2:first-child { break-before: auto; }
 .doc dt { font-weight: 620; margin-top: 6pt; }
 .doc dd { margin: 0 0 3pt 16pt; color: var(--ink-2); }
 
-/* Zitat (echtes Blockquote, kein Callout) */
+/* Quotation (a real block quote, not a callout) */
 .doc blockquote {
   margin: var(--space) 0;
   padding: 2pt 0 2pt 16pt;
@@ -386,7 +350,7 @@ body.chapters .doc > h2:first-child { break-before: auto; }
   --icon-stop: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M8.4 2.6h7.2L21.4 8.4v7.2l-5.8 5.8H8.4L2.6 15.6V8.4z'/%3E%3Cpath d='M12 7.6v5'/%3E%3Cpath d='M12 16v.6'/%3E%3C/svg%3E");
 }
 
-/* --------------------------------------------------------------- Tabellen */
+/* ----------------------------------------------------------------- Tables */
 
 .doc table {
   width: 100%;
@@ -417,12 +381,9 @@ body.chapters .doc > h2:first-child { break-before: auto; }
   vertical-align: top;
 }
 
-.doc tbody tr:nth-child(even) td { background: var(--surface); }
-.doc table :is(th, td):first-child { padding-left: 0; }
-.doc table :is(th, td):last-child  { padding-right: 0; }
 .doc td code { font-size: 0.94em; }
 
-/* --------------------------------------------------------------- Code */
+/* ------------------------------------------------------------------- Code */
 
 .doc code {
   font-family: var(--font-mono);
@@ -438,8 +399,8 @@ body.chapters .doc > h2:first-child { break-before: auto; }
   box-decoration-break: clone;
 }
 
-/* In Tabellen wuerde die Chip-Optik die Zellen zerfasern — dort reicht die
-   Festbreitenschrift als Auszeichnung. */
+/* Inside tables the chip look would fray the cells — the monospace face is
+   enough of a marker there. */
 .doc :is(th, td) code {
   background: none;
   border: 0;
@@ -454,27 +415,6 @@ body.chapters .doc > h2:first-child { break-before: auto; }
   border: 0.75pt solid var(--rule);
   border-radius: var(--radius);
 }
-
-.codeblock::after {
-  content: attr(data-lang);
-  position: absolute;
-  top: 0; right: 0;
-  padding: 3pt 8pt;
-  font-size: 7.5pt;
-  font-weight: 600;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
-  color: var(--ink-faint);
-  pointer-events: none;
-}
-
-.codeblock[data-lang=""]::after,
-.codeblock:not([data-lang])::after,
-.codeblock[data-lang="text"]::after,
-.codeblock[data-lang="txt"]::after,
-.codeblock[data-lang="plain"]::after,
-.codeblock[data-lang="plaintext"]::after,
-.codeblock[data-lang="output"]::after { content: none; }
 
 .codeblock pre {
   margin: 0;
@@ -498,8 +438,8 @@ body.chapters .doc > h2:first-child { break-before: auto; }
   font-size: inherit;
 }
 
-/* Kurze Bloecke nicht ueber Seitengrenzen zerreissen; lange duerfen umbrechen,
-   sonst entstehen halbleere Seiten. data-lines setzt der Markdown-Renderer. */
+/* Keep short blocks in one piece; long ones may break, otherwise half-empty
+   pages appear. data-lines is set by the Markdown renderer. */
 .codeblock[data-lines="1"],  .codeblock[data-lines="2"],  .codeblock[data-lines="3"],
 .codeblock[data-lines="4"],  .codeblock[data-lines="5"],  .codeblock[data-lines="6"],
 .codeblock[data-lines="7"],  .codeblock[data-lines="8"],  .codeblock[data-lines="9"],
@@ -511,7 +451,7 @@ body.chapters .doc > h2:first-child { break-before: auto; }
   break-inside: avoid;
 }
 
-/* ------------------------------------------------------- Bilder / Figuren */
+/* --------------------------------------------------------- Images / figures */
 
 .doc img { max-width: 100%; height: auto; }
 
@@ -538,12 +478,6 @@ body.chapters .doc > h2:first-child { break-before: auto; }
   hyphens: none;
 }
 
-.figure figcaption::before {
-  content: var(--label-figure) " " counter(figure) ": ";
-  font-weight: 640;
-  color: var(--ink-2);
-}
-
 /* ---------------------------------------------------------------- Mermaid */
 
 .mermaid {
@@ -558,7 +492,7 @@ body.chapters .doc > h2:first-child { break-before: auto; }
 
 .mermaid svg { max-width: 100%; height: auto; }
 
-/* -------------------------------------------------------------- Fussnoten */
+/* -------------------------------------------------------------- Footnotes */
 
 .footnotes {
   margin-top: var(--space-3);
@@ -574,7 +508,7 @@ body.chapters .doc > h2:first-child { break-before: auto; }
 
 sup a { text-decoration: none; font-size: 0.8em; color: var(--accent-strong); }
 
-/* ------------------------------------------------- Bildschirm-Vorschau */
+/* --------------------------------------------------------- Screen preview */
 
 @media screen {
   body {

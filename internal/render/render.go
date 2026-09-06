@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"html/template"
 	"os"
+	"strings"
 
 	"github.com/gstuebner/md2pdf/internal/assets"
 	"github.com/gstuebner/md2pdf/internal/config"
@@ -20,9 +21,56 @@ type TemplateData struct {
 	MermaidJS      template.JS // empty unless Doc.HasMermaid
 	ShowCover      bool
 	ShowTOC        bool
-	TOCTitle       string
 	NumberHeadings bool
 	ChapterPages   bool
+	BodyClass      string
+	Lang           string
+	Labels         Labels
+}
+
+// Labels holds the wording the document template needs in the document's
+// language. The program's own messages are always English; only what ends up
+// inside the PDF is translated.
+type Labels struct {
+	Contents  string // heading above the table of contents
+	Version   string // cover sheet: document version
+	Date      string // cover sheet: date
+	Author    string // cover sheet: author
+	Publisher string // cover sheet: company
+	Kicker    string // fallback line above the cover title
+	Untitled  string // fallback cover title
+	Document  string // fallback <title>
+}
+
+var labelsByLang = map[string]Labels{
+	"de": {
+		Contents:  "Inhalt",
+		Version:   "Version",
+		Date:      "Stand",
+		Author:    "Autor",
+		Publisher: "Herausgeber",
+		Kicker:    "Dokumentation",
+		Untitled:  "Ohne Titel",
+		Document:  "Dokument",
+	},
+	"en": {
+		Contents:  "Contents",
+		Version:   "Version",
+		Date:      "Date",
+		Author:    "Author",
+		Publisher: "Publisher",
+		Kicker:    "Documentation",
+		Untitled:  "Untitled",
+		Document:  "Document",
+	},
+}
+
+// LabelsFor returns the document labels for lang, falling back to English.
+func LabelsFor(lang string) Labels {
+	if l, ok := labelsByLang[lang]; ok {
+		return l
+	}
+	return labelsByLang["en"]
 }
 
 // RunningHead is the data header.gohtml and footer.gohtml are executed with.
@@ -38,7 +86,7 @@ type RunningHead struct {
 
 // Document renders the complete HTML document for doc using the options in o.
 func Document(doc model.Document, o config.Options) ([]byte, error) {
-	css, err := buildCSS(o.ExtraCSS)
+	css, err := buildCSS(o.Preset, o.ExtraCSS)
 	if err != nil {
 		return nil, err
 	}
@@ -52,15 +100,22 @@ func Document(doc model.Document, o config.Options) ([]byte, error) {
 		mermaidJS = template.JS(js)
 	}
 
+	lang := doc.Meta.Lang
+	if lang == "" {
+		lang = "en"
+	}
+
 	data := TemplateData{
 		Doc:            doc,
 		CSS:            template.CSS(css),
 		MermaidJS:      mermaidJS,
 		ShowCover:      o.Cover,
 		ShowTOC:        o.TOC,
-		TOCTitle:       tocTitle(doc.Meta.Lang),
 		NumberHeadings: o.NumberHeadings,
 		ChapterPages:   o.ChapterPages,
+		BodyClass:      bodyClass(o),
+		Lang:           lang,
+		Labels:         LabelsFor(lang),
 	}
 
 	out, err := executeEmbeddedTemplate("document.gohtml", data)
@@ -68,6 +123,19 @@ func Document(doc model.Document, o config.Options) ([]byte, error) {
 		return nil, err
 	}
 	return out, nil
+}
+
+// bodyClass builds the class attribute of <body>. The stylesheet keys chapter
+// numbering and page breaks off these classes.
+func bodyClass(o config.Options) string {
+	var classes []string
+	if o.NumberHeadings {
+		classes = append(classes, "numbered")
+	}
+	if o.ChapterPages {
+		classes = append(classes, "chapters")
+	}
+	return strings.Join(classes, " ")
 }
 
 // Header renders the running header for the given metadata and options.
@@ -86,9 +154,9 @@ func buildRunningHead(meta model.Meta, o config.Options) RunningHead {
 		footer = meta.Title
 	}
 
-	pageWord, ofWord := "Seite", "von"
-	if meta.Lang == "en" {
-		pageWord, ofWord = "Page", "of"
+	pageWord, ofWord := "Page", "of"
+	if meta.Lang == "de" {
+		pageWord, ofWord = "Seite", "von"
 	}
 
 	return RunningHead{
@@ -151,8 +219,11 @@ func executeEmbeddedTemplate(name string, data any) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-func buildCSS(extraCSS []string) (string, error) {
-	theme, err := assets.Theme()
+func buildCSS(preset string, extraCSS []string) (string, error) {
+	if preset == "" {
+		preset = config.DefaultPreset
+	}
+	theme, err := assets.Theme(preset)
 	if err != nil {
 		return "", fmt.Errorf("load theme css: %w", err)
 	}
@@ -170,11 +241,4 @@ func buildCSS(extraCSS []string) (string, error) {
 	}
 
 	return buf.String(), nil
-}
-
-func tocTitle(lang string) string {
-	if lang == "en" {
-		return "Contents"
-	}
-	return "Inhalt"
 }

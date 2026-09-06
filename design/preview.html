@@ -4,10 +4,42 @@
 <meta charset="utf-8">
 <title>Aurora Desk — md2pdf Designvorschau</title>
 <link rel="stylesheet" href="../internal/assets/theme/fonts.css">
-<link rel="stylesheet" href="../internal/assets/theme/default.css">
+<link rel="stylesheet" href="../internal/assets/theme/base.css">
+<link rel="stylesheet" href="../internal/assets/theme/presets/modern.css" id="preset-css">
 <link rel="stylesheet" href="../internal/assets/theme/code.css">
+<style>
+  /* Preset switcher — preview only, never part of a generated document. */
+  #preset-switcher {
+    position: fixed; top: 12px; right: 12px; z-index: 10;
+    display: flex; gap: 6px; align-items: center;
+    padding: 6px 10px; border-radius: 6px;
+    background: #ffffffee; border: 1px solid #00000022;
+    box-shadow: 0 2px 10px #0000001a;
+    font: 12px/1.4 system-ui, sans-serif; color: #333;
+  }
+  @media print { #preset-switcher { display: none; } }
+</style>
 </head>
 <body class="numbered">
+
+<div id="preset-switcher">
+  <label for="preset-select">Preset</label>
+  <select id="preset-select">
+    <option value="classic">classic</option>
+    <option value="modern" selected>modern</option>
+    <option value="technical">technical</option>
+    <option value="report">report</option>
+    <option value="plain">plain</option>
+    <option value="handout">handout</option>
+  </select>
+</div>
+
+<script>
+document.getElementById('preset-select').addEventListener('change', function (e) {
+  document.getElementById('preset-css').href =
+    '../internal/assets/theme/presets/' + e.target.value + '.css';
+});
+</script>
 
 <section class="cover">
   <div class="cover-head">

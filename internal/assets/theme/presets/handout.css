@@ -1,0 +1,77 @@
+/* Preset "handout" — landscape handout or projected reading copy. Large type,
+   lots of white space, one chapter (H2) per page, no cover, no table of
+   contents, no running header. */
+
+:root {
+  /* Accent */
+  --accent:        #b45309;
+  --accent-strong: #92400e;
+  --accent-soft:   #fff7ed;
+
+  /* Text */
+  --ink:        #1a1a1a;
+  --ink-2:      #2f2f2f;
+  --ink-muted:  #575757;
+  --ink-faint:  #9a9a9a;
+
+  /* Surfaces and rules */
+  --page:        #ffffff;
+  --surface:     #faf8f5;
+  --surface-2:   #f3efe9;
+  --rule:        #e3ded6;
+  --rule-strong: #c7c0b4;
+
+  /* Callouts: bar / fill / outline */
+  --note-line:      #b45309;  --note-bg:      #fff7ed;  --note-edge:      #f3d5b0;
+  --tip-line:       #15803d;  --tip-bg:       #f2fbf4;  --tip-edge:       #bbe6c6;
+  --important-line: #6d28d9;  --important-bg: #f6f3fd;  --important-edge: #d5c9f2;
+  --warning-line:   #a16207;  --warning-bg:   #fefaec;  --warning-edge:   #ecd8a0;
+  --caution-line:   #b91c1c;  --caution-bg:   #fdf1f1;  --caution-edge:   #efc2c2;
+
+  /* Typography */
+  --font-body: "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "JetBrains Mono", Consolas, "DejaVu Sans Mono", monospace;
+  --size-body: 13pt;
+  --leading:   1.7;
+
+  --h1-size: 28pt;
+  --h2-size: 22pt;
+  --h3-size: 16pt;
+  --h4-size: 14pt;
+
+  /* Vertical rhythm */
+  --space:   12pt;
+  --space-2: 22pt;
+  --space-3: 30pt;
+
+  --radius: 5pt;
+  --bar-offset: 14pt;
+}
+
+.doc h2 {
+  padding-left: var(--bar-offset);
+  border-left: 6pt solid var(--accent);
+  margin-top: 0;
+}
+
+/* Bigger bullets to match the type size */
+.doc ul { list-style: none; }
+.doc ul > li::before {
+  content: "";
+  position: absolute;
+  left: -14pt;
+  top: 0.55em;
+  width: 6pt;
+  height: 6pt;
+  border-radius: 50%;
+  background: var(--accent);
+}
+.doc ul > li:has(> input[type="checkbox"])::before { content: none; }
+
+.doc ul, .doc ol { padding-left: 26pt; }
+.doc li { margin: 0 0 6pt; }
+
+.doc table { font-size: 11.5pt; }
+.codeblock pre { font-size: 11pt; }
+
+.figure figcaption { text-align: center; font-size: 11pt; }

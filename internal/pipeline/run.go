@@ -24,15 +24,22 @@ func run(ctx context.Context, o config.Options) (Result, error) {
 
 	src, err := os.ReadFile(o.Input)
 	if err != nil {
-		return Result{}, fmt.Errorf("Eingabedatei konnte nicht gelesen werden: %w", err)
+		return Result{}, fmt.Errorf("cannot read input file: %w", err)
+	}
+
+	// The preset decides options that the conversion itself depends on, and a
+	// document may name its preset in the front matter, so peek at it first.
+	if err := applyPreset(&o, mdconv.PeekMeta(src)); err != nil {
+		return Result{}, err
 	}
 
 	loader := &render.FileLoader{BaseDir: filepath.Dir(o.Input)}
 
 	converted, err := mdconv.Convert(src, mdconv.Options{
-		TOCDepth: o.TOCDepth,
-		Loader:   loader,
-		Lang:     o.Meta.Lang,
+		TOCDepth:     o.TOCDepth,
+		Loader:       loader,
+		Lang:         o.Meta.Lang,
+		LangFallback: config.DetectLang(),
 	})
 	if err != nil {
 		return Result{}, err
@@ -40,11 +47,11 @@ func run(ctx context.Context, o config.Options) (Result, error) {
 
 	var notes []string
 
-	// Ein Dokument, das seine Kapitel selbst nummeriert, darf keine zweite
-	// Nummer vom Theme bekommen. ForceNumbering hebelt die Erkennung aus.
+	// A document that numbers its own chapters must not get a second number
+	// from the theme. ForceNumbering skips the detection.
 	if o.NumberHeadings && !o.ForceNumbering && converted.ManualNumbering {
 		o.NumberHeadings = false
-		notes = append(notes, "eigene Kapitelnummern erkannt, automatische Nummerierung ausgeschaltet (--force-numbering erzwingt sie)")
+		notes = append(notes, "document numbers its own chapters, automatic numbering turned off (--force-numbering overrides)")
 	}
 
 	meta := applyMetaDefaults(mergeMeta(converted.Meta, o.Meta), loader)
@@ -63,7 +70,7 @@ func run(ctx context.Context, o config.Options) (Result, error) {
 
 	if o.HTMLOut != "" {
 		if err := os.WriteFile(o.HTMLOut, html, 0o644); err != nil {
-			return Result{}, fmt.Errorf("HTML konnte nicht geschrieben werden: %w", err)
+			return Result{}, fmt.Errorf("cannot write HTML file: %w", err)
 		}
 	}
 
@@ -101,7 +108,7 @@ func run(ctx context.Context, o config.Options) (Result, error) {
 	}
 
 	if err := os.WriteFile(o.Output, pdf, 0o644); err != nil {
-		return Result{}, fmt.Errorf("PDF konnte nicht geschrieben werden: %w", err)
+		return Result{}, fmt.Errorf("cannot write PDF file: %w", err)
 	}
 
 	return Result{
@@ -162,15 +169,35 @@ func mergeMeta(fromDoc, fromFlags model.Meta) model.Meta {
 	return out
 }
 
+// applyPreset resolves which style preset the document is rendered with:
+// --preset wins, then a preset named in the front matter, then the built-in
+// default. Its structural defaults only fill in options the user left alone.
+func applyPreset(o *config.Options, docMeta model.Meta) error {
+	name := o.Preset
+	if name == "" {
+		name = docMeta.Preset
+	}
+	if name == "" {
+		name = config.DefaultPreset
+	}
+
+	preset, err := config.ParsePreset(name)
+	if err != nil {
+		return err
+	}
+	return preset.Apply(o)
+}
+
 func applyMetaDefaults(m model.Meta, loader render.AssetLoader) model.Meta {
 	if m.Lang == "" {
-		m.Lang = "de"
+		m.Lang = config.DetectLang()
 	}
+	labels := render.LabelsFor(m.Lang)
 	if m.Kicker == "" {
-		m.Kicker = "Dokumentation"
+		m.Kicker = labels.Kicker
 	}
 	if m.Date == "" {
-		m.Date = time.Now().Format("02.01.2006")
+		m.Date = time.Now().Format(dateLayout(m.Lang))
 	}
 	if m.Logo != "" {
 		if uri, err := loader.DataURI(m.Logo); err == nil {
@@ -178,4 +205,12 @@ func applyMetaDefaults(m model.Meta, loader render.AssetLoader) model.Meta {
 		}
 	}
 	return m
+}
+
+// dateLayout picks the display format for a date md2pdf fills in itself.
+func dateLayout(lang string) string {
+	if lang == "de" {
+		return "02.01.2006"
+	}
+	return "2006-01-02"
 }

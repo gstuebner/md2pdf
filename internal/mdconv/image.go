@@ -39,7 +39,7 @@ func (r *imageRenderer) render(w util.BufWriter, src []byte, n ast.Node, enterin
 	if r.loader != nil {
 		resolved, err := r.loader.DataURI(dest)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "md2pdf: Bild %q konnte nicht eingebettet werden: %v\n", dest, err)
+			fmt.Fprintf(os.Stderr, "md2pdf: warning: cannot embed image %q: %v\n", dest, err)
 		} else {
 			dest = resolved
 		}

@@ -1,0 +1,103 @@
+/* Preset "modern" — the original md2pdf look: Inter, a blue accent, an accent
+   bar next to every chapter heading, language badges on code blocks and
+   numbered figure captions. Cover page and table of contents are on. */
+
+:root {
+  /* Accent */
+  --accent:        #2563eb;
+  --accent-strong: #1d4ed8;
+  --accent-soft:   #eff6ff;
+
+  /* Text */
+  --ink:        #0f172a;
+  --ink-2:      #1e293b;
+  --ink-muted:  #475569;
+  --ink-faint:  #94a3b8;
+
+  /* Surfaces and rules */
+  --page:        #ffffff;
+  --surface:     #f8fafc;
+  --surface-2:   #f1f5f9;
+  --rule:        #e2e8f0;
+  --rule-strong: #cbd5e1;
+
+  /* Callouts: bar / fill / outline */
+  --note-line:      #2563eb;  --note-bg:      #eff6ff;  --note-edge:      #bfdbfe;
+  --tip-line:       #059669;  --tip-bg:       #ecfdf5;  --tip-edge:       #a7f3d0;
+  --important-line: #7c3aed;  --important-bg: #f5f3ff;  --important-edge: #ddd6fe;
+  --warning-line:   #b45309;  --warning-bg:   #fffbeb;  --warning-edge:   #fde68a;
+  --caution-line:   #dc2626;  --caution-bg:   #fef2f2;  --caution-edge:   #fecaca;
+
+  /* Typography */
+  --font-body: "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "JetBrains Mono", "Cascadia Mono", "Consolas", "DejaVu Sans Mono", monospace;
+  --size-body: 10.5pt;
+  --leading:   1.62;
+
+  --h1-size: 21pt;
+  --h2-size: 16pt;
+  --h3-size: 12.5pt;
+  --h4-size: 11pt;
+
+  /* Vertical rhythm */
+  --space:   9pt;
+  --space-2: 18pt;
+  --space-3: 27pt;
+
+  --radius: 4pt;
+  --bar-offset: 12pt;
+}
+
+/* Accent bar next to chapter headings */
+.doc h2 {
+  padding-left: var(--bar-offset);
+  border-left: 4pt solid var(--accent);
+}
+
+/* Round, muted bullets instead of the browser default */
+.doc ul { list-style: none; }
+.doc ul > li::before {
+  content: "";
+  position: absolute;
+  left: -12pt;
+  top: 0.58em;
+  width: 4pt;
+  height: 4pt;
+  border-radius: 50%;
+  background: var(--rule-strong);
+}
+.doc ul > li:has(> input[type="checkbox"])::before { content: none; }
+
+/* Language badge in the top right corner of a code block */
+.codeblock::after {
+  content: attr(data-lang);
+  position: absolute;
+  top: 0; right: 0;
+  padding: 3pt 8pt;
+  font-size: 7.5pt;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  pointer-events: none;
+}
+
+.codeblock[data-lang=""]::after,
+.codeblock:not([data-lang])::after,
+.codeblock[data-lang="text"]::after,
+.codeblock[data-lang="txt"]::after,
+.codeblock[data-lang="plain"]::after,
+.codeblock[data-lang="plaintext"]::after,
+.codeblock[data-lang="output"]::after { content: none; }
+
+/* Numbered figure captions */
+.figure figcaption::before {
+  content: var(--label-figure) " " counter(figure) ": ";
+  font-weight: 640;
+  color: var(--ink-2);
+}
+
+/* Zebra striping, and tables that bleed into the text column */
+.doc tbody tr:nth-child(even) td { background: var(--surface); }
+.doc table :is(th, td):first-child { padding-left: 0; }
+.doc table :is(th, td):last-child  { padding-right: 0; }

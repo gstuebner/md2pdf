@@ -1,8 +1,6 @@
-# Makefile fuer md2pdf.
+# Makefile for md2pdf.
 #
-# Dieses Repository ist kein Git-Repository, daher gibt es keine
-# `git describe`-Version. VERSION hat stattdessen einen festen Default und
-# laesst sich beim Aufruf ueberschreiben, z. B.:
+# VERSION has a fixed default and can be overridden on the command line:
 #
 #   make build VERSION=2.4.0
 

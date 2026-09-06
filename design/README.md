@@ -8,12 +8,14 @@ actual assets that get embedded into the binary live under
 
 | File                    | Purpose                                                                |
 | ----------------------- | --------------------------------------------------------------------- |
-| `preview.html`          | Static design reference with all supported elements                    |
+| `preview.html`          | Static design reference with all supported elements, with a preset switcher |
 | `branding-example.css`  | Example of how to recolor the theme via `--css`                       |
 
 `preview.html` pulls in the theme files from `internal/assets/theme/` via
 `<link>`. So there's no second copy of the CSS — what you see here is
-exactly what the binary ships later on.
+exactly what the binary ships later on. The switcher in the top right corner
+swaps the preset stylesheet, so every preset can be reviewed in the same
+document.
 
 ## Viewing
 
@@ -40,6 +42,20 @@ definition lists, blockquote, all five callout types, tables, inline code,
 code blocks (bash, yaml, go, shell, diff, text), a figure with caption and
 numbering, two Mermaid diagrams, footnotes.
 
+## Stylesheet layout
+
+The theme is split in two. `internal/assets/theme/base.css` carries the
+structure every preset shares — layout, page handling, counters, and the
+mechanics behind cover, contents, callouts, tables, code blocks and figures.
+Colours, fonts, sizes and decoration come from
+`internal/assets/theme/presets/<name>.css`, which is appended after it, so a
+preset can also override single rules. `code.css` (Chroma colours) and the
+`--css` files come last.
+
+A new preset is one file under `theme/presets/` plus one entry in
+`config.Presets` (`internal/config/preset.go`), which also carries the
+structural defaults — cover page, contents, numbering, margins.
+
 ## Swapping fonts
 
 The fonts live as woff2 under `internal/assets/fonts/` and get written by
@@ -50,5 +66,6 @@ After swapping a woff2 file:
 ./scripts/genfonts.sh
 ```
 
-Both bundled fonts are licensed under the SIL Open Font License 1.1; the
-license texts sit right next to them.
+All bundled fonts — Inter, Source Serif 4 and JetBrains Mono — are licensed
+under the SIL Open Font License 1.1; the license texts sit right next to
+them.

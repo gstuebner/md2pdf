@@ -31,6 +31,9 @@ type Options struct {
 	Loader   AssetLoader
 	// Lang preselects the callout labels. Front matter overrides it.
 	Lang string
+	// LangFallback is used when neither Lang nor the front matter names a
+	// language. Empty means "en".
+	LangFallback string
 }
 
 type Result struct {
@@ -89,6 +92,9 @@ func Convert(src []byte, o Options) (Result, error) {
 	// so that a --lang flag keeps precedence over the document.
 	if res.Meta.Lang != "" && o.Lang == "" {
 		state.lang = res.Meta.Lang
+	}
+	if state.lang == "" {
+		state.lang = o.LangFallback
 	}
 
 	if title := takeTitleHeading(doc, src); title != "" && res.Meta.Title == "" {

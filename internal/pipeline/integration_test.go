@@ -27,7 +27,7 @@ func showcasePath(t *testing.T) string {
 func requireBrowser(t *testing.T) {
 	t.Helper()
 	if _, err := browser.Find(""); err != nil {
-		t.Skip("kein Chromium gefunden, Integrationstest wird übersprungen")
+		t.Skip("no Chromium found, skipping integration test")
 	}
 }
 
@@ -75,6 +75,7 @@ func TestRunWritesDebugHTML(t *testing.T) {
 	o.Input = showcasePath(t)
 	o.Output = filepath.Join(dir, "out.pdf")
 	o.HTMLOut = filepath.Join(dir, "out.html")
+	o.Preset = "modern"
 	o.Timeout = 60 * time.Second
 
 	if _, err := Run(context.Background(), o); err != nil {
@@ -104,7 +105,7 @@ func TestRunReportsMissingBrowser(t *testing.T) {
 	o := config.DefaultOptions()
 	o.Input = showcasePath(t)
 	o.Output = filepath.Join(t.TempDir(), "out.pdf")
-	o.BrowserPath = filepath.Join(t.TempDir(), "gibt-es-nicht")
+	o.BrowserPath = filepath.Join(t.TempDir(), "does-not-exist")
 
 	_, err := Run(context.Background(), o)
 	if err == nil {
@@ -139,6 +140,7 @@ func TestManualNumberingDisablesAutoNumbers(t *testing.T) {
 	o.Input = input
 	o.Output = filepath.Join(dir, "out.pdf")
 	o.HTMLOut = filepath.Join(dir, "out.html")
+	o.Preset = "modern"
 	o.Timeout = 60 * time.Second
 
 	res, err := Run(context.Background(), o)
@@ -151,10 +153,10 @@ func TestManualNumberingDisablesAutoNumbers(t *testing.T) {
 		t.Fatal(err)
 	}
 	if bytes.Contains(html, []byte(`class="numbered`)) {
-		t.Error("automatische Nummerierung blieb an, obwohl das Dokument eigene Nummern mitbringt")
+		t.Error("automatic numbering stayed on although the document brings its own numbers")
 	}
 	if len(res.Notes) == 0 {
-		t.Error("kein Hinweis auf die abgeschaltete Nummerierung")
+		t.Error("no note about the disabled numbering")
 	}
 }
 
@@ -173,6 +175,7 @@ func TestForceNumberingOverridesDetection(t *testing.T) {
 	o.Output = filepath.Join(dir, "out.pdf")
 	o.HTMLOut = filepath.Join(dir, "out.html")
 	o.ForceNumbering = true
+	o.Preset = "modern"
 	o.Timeout = 60 * time.Second
 
 	res, err := Run(context.Background(), o)
@@ -185,9 +188,9 @@ func TestForceNumberingOverridesDetection(t *testing.T) {
 		t.Fatal(err)
 	}
 	if !bytes.Contains(html, []byte(`class="numbered`)) {
-		t.Error("--force-numbering hat die Erkennung nicht übergangen")
+		t.Error("--force-numbering did not override the detection")
 	}
 	if len(res.Notes) != 0 {
-		t.Errorf("unerwarteter Hinweis: %v", res.Notes)
+		t.Errorf("unexpected note: %v", res.Notes)
 	}
 }

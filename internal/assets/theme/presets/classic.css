@@ -1,0 +1,89 @@
+/* Preset "classic" — the default. A plain, compact office document in the
+   spirit of the older md2pdf.ps1 PowerShell script: dark blue rule under the
+   title, hairline under each chapter heading, fully bordered tables, no cover
+   page and no table of contents unless you ask for them. */
+
+:root {
+  /* Accent */
+  --accent:        #004b87;
+  --accent-strong: #004b87;
+  --accent-soft:   #eef2f6;
+
+  /* Text */
+  --ink:        #1a1a1a;
+  --ink-2:      #333333;
+  --ink-muted:  #444444;
+  --ink-faint:  #777777;
+
+  /* Surfaces and rules */
+  --page:        #ffffff;
+  --surface:     #f6f8fa;
+  --surface-2:   #f1f3f5;
+  --rule:        #d9dde2;
+  --rule-strong: #c8ccd1;
+
+  /* Callouts: bar / fill / outline */
+  --note-line:      #004b87;  --note-bg:      #eef2f6;  --note-edge:      #c3d3e2;
+  --tip-line:       #1c7a4a;  --tip-bg:       #eef7f2;  --tip-edge:       #bcdcca;
+  --important-line: #5b3a9e;  --important-bg: #f2effa;  --important-edge: #cfc4e8;
+  --warning-line:   #9a6100;  --warning-bg:   #fdf6e7;  --warning-edge:   #ecd6a4;
+  --caution-line:   #b3261e;  --caution-bg:   #fdf0ef;  --caution-edge:   #eec3bf;
+
+  /* Typography — Inter ships with md2pdf and stands in for Segoe UI, so the
+     output is identical on every platform. */
+  --font-body: "Inter", "Segoe UI", Calibri, Arial, sans-serif;
+  --font-mono: "JetBrains Mono", Consolas, "Cascadia Mono", "Courier New", monospace;
+  --size-body: 10.5pt;
+  --leading:   1.5;
+
+  --h1-size: 19pt;
+  --h2-size: 15pt;
+  --h3-size: 12.5pt;
+  --h4-size: 11pt;
+
+  /* Vertical rhythm — tighter than "modern" */
+  --space:   6pt;
+  --space-2: 12pt;
+  --space-3: 14pt;
+
+  --radius: 3pt;
+}
+
+/* --------------------------------------------------------------- Headings */
+
+.doc h1 {
+  color: var(--accent);
+  padding-bottom: 3pt;
+  border-bottom: 2pt solid var(--accent);
+}
+
+.doc h2 {
+  padding-bottom: 2.5pt;
+  border-bottom: 0.75pt solid var(--rule);
+}
+
+/* ----------------------------------------------------------------- Tables */
+
+.doc th, .doc td { border: 0.75pt solid var(--rule-strong); }
+.doc th { background: #eef2f6; border-bottom: 0.75pt solid var(--rule-strong); }
+.doc tbody tr:nth-child(even) td { background: #fafbfc; }
+
+/* ------------------------------------------------------------------- Code */
+
+.codeblock pre { font-size: 9pt; }
+
+/* ------------------------------------------------------------ Text detail */
+
+.doc a { text-decoration: none; }
+.doc del { color: var(--ink-faint); }
+
+.doc blockquote {
+  padding: 3pt 12pt;
+  border-left: 3pt solid var(--rule-strong);
+  background: #fafbfc;
+  color: var(--ink-muted);
+  font-style: normal;
+}
+
+/* Captions sit centred under the image and are not numbered */
+.figure figcaption { text-align: center; }

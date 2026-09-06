@@ -7,7 +7,12 @@ import (
 
 func convertString(t *testing.T, src string) string {
 	t.Helper()
-	res, err := Convert([]byte(src), Options{TOCDepth: 3, Loader: stubLoader{}})
+	return convertStringLang(t, src, "")
+}
+
+func convertStringLang(t *testing.T, src, lang string) string {
+	t.Helper()
+	res, err := Convert([]byte(src), Options{TOCDepth: 3, Loader: stubLoader{}, Lang: lang})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -16,15 +21,15 @@ func convertString(t *testing.T, src string) string {
 
 func TestCalloutKinds(t *testing.T) {
 	cases := []struct{ marker, class, title string }{
-		{"NOTE", "callout-note", "Hinweis"},
-		{"TIP", "callout-tip", "Tipp"},
-		{"IMPORTANT", "callout-important", "Wichtig"},
-		{"WARNING", "callout-warning", "Warnung"},
-		{"CAUTION", "callout-caution", "Achtung"},
+		{"NOTE", "callout-note", "Note"},
+		{"TIP", "callout-tip", "Tip"},
+		{"IMPORTANT", "callout-important", "Important"},
+		{"WARNING", "callout-warning", "Warning"},
+		{"CAUTION", "callout-caution", "Caution"},
 	}
 	for _, c := range cases {
 		t.Run(c.marker, func(t *testing.T) {
-			got := convertString(t, "> [!"+c.marker+"]\n> Inhalt.\n")
+			got := convertStringLang(t, "> [!"+c.marker+"]\n> Inhalt.\n", "en")
 			if !strings.Contains(got, `class="callout `+c.class+`"`) {
 				t.Errorf("missing class %q in:\n%s", c.class, got)
 			}
@@ -82,5 +87,23 @@ func TestCalloutLanguageFollowsFrontMatter(t *testing.T) {
 	got := convertString(t, "---\nlang: en\n---\n\n> [!WARNING]\n> Careful.\n")
 	if !strings.Contains(got, ">Warning<") {
 		t.Errorf("english callout title missing:\n%s", got)
+	}
+}
+
+// TestCalloutTitlesGerman pins the German wording, which --lang de and a
+// "lang: de" front matter select.
+func TestCalloutTitlesGerman(t *testing.T) {
+	cases := map[string]string{
+		"NOTE":      "Hinweis",
+		"TIP":       "Tipp",
+		"IMPORTANT": "Wichtig",
+		"WARNING":   "Warnung",
+		"CAUTION":   "Achtung",
+	}
+	for marker, title := range cases {
+		got := convertStringLang(t, "> [!"+marker+"]\n> Inhalt.\n", "de")
+		if !strings.Contains(got, ">"+title+"<") {
+			t.Errorf("lang=de: missing title %q in:\n%s", title, got)
+		}
 	}
 }

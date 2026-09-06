@@ -27,7 +27,11 @@ func credits() string {
 }
 
 // errUsage marks errors caused by invalid CLI arguments (exit code 2).
-var errUsage = errors.New("ungültige Argumente")
+var errUsage = errors.New("invalid arguments")
+
+// usageHint follows every usage error, so that a bare "md2pdf" points the way
+// to the help instead of leaving the reader with just a complaint.
+const usageHint = "Run 'md2pdf -h' for usage and all available flags."
 
 // runPipeline is a package-level indirection so tests can stub the pipeline
 // without invoking a real browser.
@@ -70,17 +74,19 @@ func newRootCmd(o *config.Options) *cobra.Command {
 		noOutline      bool
 		quiet          bool
 		showVersion    bool
+		presetFlag     string
+		listPresets    bool
 	)
 
 	cmd := &cobra.Command{
 		Use:   "md2pdf <input.md> [flags]",
-		Short: "Konvertiert eine Markdown-Datei in ein druckreifes PDF",
+		Short: "Convert a Markdown file into a print-ready PDF",
 		Args: func(cmd *cobra.Command, args []string) error {
-			if showVersion {
+			if showVersion || listPresets {
 				return nil
 			}
 			if len(args) != 1 {
-				return fmt.Errorf("%w: genau eine Markdown-Datei erwartet, %d erhalten", errUsage, len(args))
+				return fmt.Errorf("%w: expected exactly one Markdown file, got %d", errUsage, len(args))
 			}
 			return nil
 		},
@@ -89,6 +95,10 @@ func newRootCmd(o *config.Options) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if showVersion {
 				fmt.Fprintln(cmd.OutOrStdout(), credits())
+				return nil
+			}
+			if listPresets {
+				fmt.Fprint(cmd.OutOrStdout(), presetList())
 				return nil
 			}
 
@@ -128,7 +138,29 @@ func newRootCmd(o *config.Options) *cobra.Command {
 				o.Meta.Lang = langFlag
 			}
 
+			// The style preset supplies the structural defaults, but only for
+			// options the user did not set. Everything named on the command
+			// line is recorded here and stays untouched.
+			flags := cmd.Flags()
+			o.Preset = presetFlag
+			o.Explicit = config.Explicit{
+				Cover:          flags.Changed("no-cover"),
+				TOC:            flags.Changed("no-toc") || flags.Changed("toc-depth"),
+				TOCDepth:       flags.Changed("toc-depth"),
+				NumberHeadings: flags.Changed("no-numbering"),
+				ChapterPages:   flags.Changed("chapter-pages"),
+				Landscape:      flags.Changed("landscape"),
+				Header:         flags.Changed("no-header"),
+				Footer:         flags.Changed("no-footer"),
+				Margins:        flags.Changed("margin"),
+			}
+
 			o.TOC = !noTOC
+			// Naming a depth means you want a table of contents, even under a
+			// preset that leaves it off. --no-toc still wins.
+			if flags.Changed("toc-depth") && !flags.Changed("no-toc") {
+				o.TOC = true
+			}
 			o.TOCDepth = tocDepthFlag
 			o.Cover = !noCover
 			o.NumberHeadings = !noNumbering
@@ -142,11 +174,23 @@ func newRootCmd(o *config.Options) *cobra.Command {
 			o.Paper = paper
 			o.Landscape = landscape
 
-			margins, err := config.ParseMargins(marginFlag)
-			if err != nil {
-				return fmt.Errorf("%w: %v", errUsage, err)
+			if marginFlag != "" {
+				margins, err := config.ParseMargins(marginFlag)
+				if err != nil {
+					return fmt.Errorf("%w: %v", errUsage, err)
+				}
+				o.Margins = margins
 			}
-			o.Margins = margins
+
+			// An abbreviated --preset is resolved right here, so that the rest
+			// of the program only ever sees a full preset name.
+			if presetFlag != "" {
+				preset, err := config.ParsePreset(presetFlag)
+				if err != nil {
+					return fmt.Errorf("%w: %v", errUsage, err)
+				}
+				o.Preset = preset.Name
+			}
 
 			o.Header = !noHeader
 			o.Footer = !noFooter
@@ -179,39 +223,57 @@ func newRootCmd(o *config.Options) *cobra.Command {
 	cmd.SetHelpTemplate(cmd.HelpTemplate() + "\n" + credits() + "\n")
 
 	flags := cmd.Flags()
-	flags.StringVarP(&outputFlag, "output", "o", "", "Ziel-PDF (Default: Eingabename mit .pdf)")
-	flags.StringArrayVar(&cssFlag, "css", nil, "zusätzliche CSS-Datei(en), mehrfach angebbar")
-	flags.StringVar(&titleFlag, "title", "", "überschreibt Frontmatter")
-	flags.StringVar(&subtitleFlag, "subtitle", "", "überschreibt Frontmatter")
-	flags.StringVar(&kickerFlag, "kicker", "", "überschreibt Frontmatter")
-	flags.StringVar(&docVersionFlag, "doc-version", "", "Dokumentversion (nicht die Programmversion)")
-	flags.StringVar(&authorFlag, "author", "", "überschreibt Frontmatter")
-	flags.StringVar(&companyFlag, "company", "", "überschreibt Frontmatter")
-	flags.StringVar(&dateFlag, "date", "", "überschreibt Frontmatter")
-	flags.StringVar(&logoFlag, "logo", "", "überschreibt Frontmatter")
-	flags.StringVar(&langFlag, "lang", "", "Dokumentsprache de|en, steuert Beschriftungen (Default: de)")
-	flags.BoolVar(&noTOC, "no-toc", false, "kein Inhaltsverzeichnis")
-	flags.IntVar(&tocDepthFlag, "toc-depth", config.DefaultOptions().TOCDepth, "Tiefe des Inhaltsverzeichnisses")
-	flags.BoolVar(&noCover, "no-cover", false, "kein Deckblatt")
-	flags.BoolVar(&noNumbering, "no-numbering", false, "keine Kapitelnummern")
-	flags.BoolVar(&forceNumbering, "force-numbering", false, "auch dann nummerieren, wenn das Dokument eigene Kapitelnummern mitbringt")
-	flags.BoolVar(&chapterPages, "chapter-pages", false, "jedes Kapitel (H2) auf neuer Seite")
+	flags.StringVarP(&outputFlag, "output", "o", "", "target PDF (default: input name with .pdf)")
+	flags.StringVarP(&presetFlag, "preset", "p", "", "style preset: "+strings.Join(config.PresetNames(), "|")+"; an unambiguous prefix is enough (default: "+config.DefaultPreset+")")
+	flags.BoolVar(&listPresets, "list-presets", false, "list the built-in style presets and exit")
+	flags.StringArrayVar(&cssFlag, "css", nil, "extra CSS file, repeatable; applied after the preset")
+	flags.StringVar(&titleFlag, "title", "", "overrides the front matter")
+	flags.StringVar(&subtitleFlag, "subtitle", "", "overrides the front matter")
+	flags.StringVar(&kickerFlag, "kicker", "", "overrides the front matter")
+	flags.StringVar(&docVersionFlag, "doc-version", "", "document version (not the program version)")
+	flags.StringVar(&authorFlag, "author", "", "overrides the front matter")
+	flags.StringVar(&companyFlag, "company", "", "overrides the front matter")
+	flags.StringVar(&dateFlag, "date", "", "overrides the front matter")
+	flags.StringVar(&logoFlag, "logo", "", "overrides the front matter")
+	flags.StringVar(&langFlag, "lang", "", "document language de|en, controls the labels in the PDF (default: front matter, else locale, else en)")
+	flags.BoolVar(&noTOC, "no-toc", false, "no table of contents")
+	flags.IntVar(&tocDepthFlag, "toc-depth", 0, "depth of the table of contents; implies a table of contents (preset default)")
+	flags.BoolVar(&noCover, "no-cover", false, "no cover page")
+	flags.BoolVar(&noNumbering, "no-numbering", false, "no chapter numbers")
+	flags.BoolVar(&forceNumbering, "force-numbering", false, "number chapters even when the document brings its own numbers")
+	flags.BoolVar(&chapterPages, "chapter-pages", false, "start every chapter (H2) on a new page")
 	flags.StringVar(&paperFlag, "paper", "A4", "A4|A5|Letter|Legal")
-	flags.BoolVar(&landscape, "landscape", false, "Querformat")
-	flags.StringVar(&marginFlag, "margin", "25mm 20mm 20mm 20mm", `"20mm" | "25mm 20mm" | "25mm 20mm 20mm 20mm"`)
-	flags.BoolVar(&noHeader, "no-header", false, "keine laufende Kopfzeile")
-	flags.BoolVar(&noFooter, "no-footer", false, "keine Fußzeile (auch keine Seitenzahlen)")
-	flags.StringVar(&headerTemplate, "header-template", "", "eigenes Chromium-Kopfzeilentemplate")
-	flags.StringVar(&footerTemplate, "footer-template", "", "eigenes Chromium-Fußzeilentemplate")
-	flags.StringVar(&browserPath, "browser-path", "", "Pfad zur Browser-Engine")
-	flags.StringArrayVar(&browserArgs, "browser-arg", nil, "zusätzliches Chromium-Argument, mehrfach angebbar")
-	flags.StringVar(&htmlOut, "html-out", "", "erzeugtes HTML zusätzlich speichern (Debug)")
-	flags.DurationVar(&timeoutFlag, "timeout", config.DefaultOptions().Timeout, "Render-Timeout")
-	flags.BoolVar(&noOutline, "no-outline", false, "keine PDF-Lesezeichen")
-	flags.BoolVarP(&quiet, "quiet", "q", false, "keine Erfolgsmeldung")
-	flags.BoolVarP(&showVersion, "version", "v", false, "Programmversion")
+	flags.BoolVar(&landscape, "landscape", false, "landscape orientation")
+	flags.StringVar(&marginFlag, "margin", "", `"20mm" | "25mm 20mm" | "25mm 20mm 20mm 20mm" (preset default)`)
+	flags.BoolVar(&noHeader, "no-header", false, "no running header")
+	flags.BoolVar(&noFooter, "no-footer", false, "no footer, and therefore no page numbers")
+	flags.StringVar(&headerTemplate, "header-template", "", "custom Chromium header template")
+	flags.StringVar(&footerTemplate, "footer-template", "", "custom Chromium footer template")
+	flags.StringVar(&browserPath, "browser-path", "", "path to the browser engine")
+	flags.StringArrayVar(&browserArgs, "browser-arg", nil, "extra Chromium argument, repeatable")
+	flags.StringVar(&htmlOut, "html-out", "", "also write the generated HTML (debugging)")
+	flags.DurationVar(&timeoutFlag, "timeout", config.DefaultOptions().Timeout, "render timeout")
+	flags.BoolVar(&noOutline, "no-outline", false, "no PDF bookmarks")
+	flags.BoolVarP(&quiet, "quiet", "q", false, "no success message")
+	flags.BoolVarP(&showVersion, "version", "v", false, "program version")
 
 	return cmd
+}
+
+// presetList renders the --list-presets output: one line per preset, name and
+// description in two columns.
+func presetList() string {
+	width := 0
+	for _, p := range config.Presets {
+		if len(p.Name) > width {
+			width = len(p.Name)
+		}
+	}
+	var b strings.Builder
+	for _, p := range config.Presets {
+		fmt.Fprintf(&b, "  %-*s  %s\n", width, p.Name, p.Description)
+	}
+	return b.String()
 }
 
 // deriveOutputPath replaces the input file's extension with .pdf, or
@@ -278,12 +340,13 @@ func execute(args []string, stdout, stderr io.Writer) int {
 	switch {
 	case errors.Is(err, errUsage):
 		fmt.Fprintf(stderr, "md2pdf: %v\n", err)
+		fmt.Fprintln(stderr, usageHint)
 		return 2
 	case errors.Is(err, pipeline.ErrBrowserNotFound):
 		// Wer einen Pfad explizit angegeben hat, braucht keine Installationshinweise,
 		// sondern die Information, dass genau dieser Pfad nicht funktioniert.
 		if o.BrowserPath != "" {
-			fmt.Fprintf(stderr, "md2pdf: der angegebene Browser-Pfad %q ist nicht nutzbar.\n", o.BrowserPath)
+			fmt.Fprintf(stderr, "md2pdf: the browser path %q cannot be used.\n", o.BrowserPath)
 		} else {
 			fmt.Fprintln(stderr, pipeline.BrowserNotFoundHelp)
 		}

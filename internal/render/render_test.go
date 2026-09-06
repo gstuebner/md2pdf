@@ -39,9 +39,9 @@ func TestDocumentCSSOrder(t *testing.T) {
 		t.Fatalf("write extra css: %v", err)
 	}
 
-	theme, err := assets.Theme()
+	theme, err := assets.Theme(config.DefaultPreset)
 	if err != nil {
-		t.Fatalf("assets.Theme(): %v", err)
+		t.Fatalf("assets.Theme(%q): %v", config.DefaultPreset, err)
 	}
 
 	o := baseOptions()
@@ -149,8 +149,8 @@ func TestDocumentTOCTitle(t *testing.T) {
 	}{
 		{"de", "Inhalt"},
 		{"en", "Contents"},
-		{"", "Inhalt"},
-		{"fr", "Inhalt"},
+		{"", "Contents"},
+		{"fr", "Contents"},
 	}
 
 	for _, tc := range cases {

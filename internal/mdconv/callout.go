@@ -38,7 +38,7 @@ var calloutTitles = map[string]map[string]string{
 func calloutTitle(kind, lang string) string {
 	titles, ok := calloutTitles[lang]
 	if !ok {
-		titles = calloutTitles["de"]
+		titles = calloutTitles["en"]
 	}
 	if t, ok := titles[kind]; ok {
 		return t

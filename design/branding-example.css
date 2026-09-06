@@ -1,10 +1,10 @@
-/* Beispiel fuer eigenes Branding.
-   Aufruf:  md2pdf handbuch.md --css design/branding-example.css
+/* Example of custom branding.
+   Usage:  md2pdf handbuch.md --preset modern --css design/branding-example.css
 
-   Das Standard-Theme legt alle Farben, Schriftgroessen und Abstaende als Custom
-   Properties auf :root ab. Fuer ein eigenes Corporate Design genuegt es daher in
-   aller Regel, hier ein paar Werte zu ueberschreiben — die Regeln selbst muessen
-   nicht nachgebaut werden. Diese Datei wird nach dem Theme geladen und gewinnt. */
+   Every preset puts all colours, font sizes and spacing on :root as custom
+   properties. For a corporate design it is therefore usually enough to
+   override a few values here — the rules themselves need no rebuilding. This
+   file loads after the preset and wins. */
 
 :root {
   /* Akzentfarbe: bestimmt Deckblattleiste, Kapitelbalken, Nummerierung, Links. */

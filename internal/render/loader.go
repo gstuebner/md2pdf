@@ -41,23 +41,23 @@ func (l *FileLoader) DataURI(src string) (string, error) {
 
 	info, err := os.Stat(path)
 	if err != nil {
-		l.warnf("md2pdf: Warnung: Bild %q konnte nicht gelesen werden: %v\n", src, err)
+		l.warnf("md2pdf: warning: cannot read image %q: %v\n", src, err)
 		return src, nil
 	}
 	if info.Size() > maxAssetSize {
-		l.warnf("md2pdf: Warnung: Bild %q überschreitet die Größenbegrenzung von 20 MB und wird unverändert übernommen\n", src)
+		l.warnf("md2pdf: warning: image %q exceeds the 20 MB limit and is used unchanged\n", src)
 		return src, nil
 	}
 
 	data, err := os.ReadFile(path)
 	if err != nil {
-		l.warnf("md2pdf: Warnung: Bild %q konnte nicht gelesen werden: %v\n", src, err)
+		l.warnf("md2pdf: warning: cannot read image %q: %v\n", src, err)
 		return src, nil
 	}
 
 	mime, unknown := mimeType(path)
 	if unknown {
-		l.warnf("md2pdf: Warnung: unbekannte Dateiendung bei %q, verwende application/octet-stream\n", src)
+		l.warnf("md2pdf: warning: unknown file extension on %q, using application/octet-stream\n", src)
 	}
 
 	return "data:" + mime + ";base64," + base64.StdEncoding.EncodeToString(data), nil

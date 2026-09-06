@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
-# Baut md2pdf für Linux und Windows (jeweils amd64) nach dist/.
+# Builds md2pdf for Linux and Windows (amd64 each) into dist/.
 #
-#   ./build.sh                 # Version "dev"
-#   ./build.sh 1.2.0           # Version 1.2.0
-#   VERSION=1.2.0 ./build.sh   # dasselbe über die Umgebung
+#   ./build.sh                 # version "dev"
+#   ./build.sh 1.2.0           # version 1.2.0
+#   VERSION=1.2.0 ./build.sh   # the same, via the environment
 #
-# Es wird statisch gelinkt (CGO_ENABLED=0), das Ergebnis läuft also ohne
-# weitere Bibliotheken. Zur Laufzeit braucht md2pdf trotzdem eine installierte
-# Chromium-Engine — die wird nicht mitgeliefert.
+# The binaries are linked statically (CGO_ENABLED=0) and need no further
+# libraries. At runtime md2pdf still needs an installed Chromium engine, which
+# is not bundled.
 
 set -euo pipefail
 
@@ -19,7 +19,7 @@ PKG="github.com/gstuebner/md2pdf"
 LDFLAGS="-s -w -X ${PKG}/cmd.version=${VERSION}"
 
 if ! command -v go >/dev/null 2>&1; then
-  echo "build.sh: go ist nicht installiert oder nicht im PATH." >&2
+  echo "build.sh: go is not installed or not in PATH." >&2
   exit 1
 fi
 
@@ -36,7 +36,7 @@ build() {
 echo "md2pdf ${VERSION} — $(go version | cut -d' ' -f3)"
 echo
 
-echo "Prüfen:"
+echo "Checking:"
 printf '  %-16s ' "vet"
 go vet ./...
 echo "ok"
@@ -45,10 +45,10 @@ go test ./... >/dev/null
 echo "ok"
 echo
 
-echo "Bauen:"
+echo "Building:"
 build linux   amd64 md2pdf
 build windows amd64 md2pdf.exe
 echo
 
-echo "Fertig. Schnelltest der Linux-Fassung:"
+echo "Done. Quick check of the Linux build:"
 "${OUTDIR}/md2pdf" --version

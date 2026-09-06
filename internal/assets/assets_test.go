@@ -22,19 +22,28 @@ func TestTemplate(t *testing.T) {
 }
 
 func TestTheme(t *testing.T) {
-	css, err := Theme()
-	if err != nil {
-		t.Fatalf("Theme() error: %v", err)
+	for _, preset := range []string{"classic", "modern", "technical", "report", "plain", "handout"} {
+		css, err := Theme(preset)
+		if err != nil {
+			t.Fatalf("Theme(%q) error: %v", preset, err)
+		}
+		s := string(css)
+		if !strings.Contains(s, "@font-face") {
+			t.Errorf("Theme(%q) should contain fonts.css (@font-face)", preset)
+		}
+		if !strings.Contains(s, "callout") {
+			t.Errorf("Theme(%q) should contain base.css (callout)", preset)
+		}
+		if !strings.Contains(s, "--font-body") {
+			t.Errorf("Theme(%q) should contain the preset stylesheet (--font-body)", preset)
+		}
+		if !strings.Contains(s, "chroma") {
+			t.Errorf("Theme(%q) should contain code.css (chroma)", preset)
+		}
 	}
-	s := string(css)
-	if !strings.Contains(s, "@font-face") {
-		t.Errorf("Theme() should contain fonts.css (@font-face)")
-	}
-	if !strings.Contains(s, "callout") {
-		t.Errorf("Theme() should contain default.css (callout)")
-	}
-	if !strings.Contains(s, "chroma") {
-		t.Errorf("Theme() should contain code.css (chroma)")
+
+	if _, err := Theme("nonexistent"); err == nil {
+		t.Errorf("Theme(nonexistent) expected error, got nil")
 	}
 }
 

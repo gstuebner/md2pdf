@@ -17,7 +17,7 @@ import (
 
 // ErrRenderTimeout is returned by Print when the document does not signal
 // readiness (window.__md2pdfReady === true) within PrintOptions.Timeout.
-var ErrRenderTimeout = errors.New("Rendern hat das Zeitlimit überschritten")
+var ErrRenderTimeout = errors.New("rendering timed out")
 
 // PrintOptions holds everything Print needs to render an HTML document to
 // PDF via Page.PrintToPDF.
@@ -45,18 +45,18 @@ type PrintOptions struct {
 func Print(ctx context.Context, o PrintOptions) ([]byte, error) {
 	tmpDir, err := os.MkdirTemp("", "md2pdf-print-*")
 	if err != nil {
-		return nil, fmt.Errorf("temporäres Verzeichnis konnte nicht angelegt werden: %w", err)
+		return nil, fmt.Errorf("cannot create temporary directory: %w", err)
 	}
 	defer os.RemoveAll(tmpDir)
 
 	htmlPath := filepath.Join(tmpDir, "document.html")
 	if err := os.WriteFile(htmlPath, o.HTML, 0o644); err != nil {
-		return nil, fmt.Errorf("temporäre HTML-Datei konnte nicht geschrieben werden: %w", err)
+		return nil, fmt.Errorf("cannot write temporary HTML file: %w", err)
 	}
 
 	absPath, err := filepath.Abs(htmlPath)
 	if err != nil {
-		return nil, fmt.Errorf("absoluter Pfad zur HTML-Datei konnte nicht ermittelt werden: %w", err)
+		return nil, fmt.Errorf("cannot resolve the absolute path of the HTML file: %w", err)
 	}
 	fileURL := "file://" + filepath.ToSlash(absPath)
 
@@ -114,9 +114,9 @@ func Print(ctx context.Context, o PrintOptions) ([]byte, error) {
 	)
 	if runErr != nil {
 		if errors.Is(runErr, chromedp.ErrPollingTimeout) {
-			return nil, fmt.Errorf("Dokument hat window.__md2pdfReady nicht innerhalb von %s gesetzt: %w", o.Timeout, ErrRenderTimeout)
+			return nil, fmt.Errorf("document did not set window.__md2pdfReady within %s: %w", o.Timeout, ErrRenderTimeout)
 		}
-		return nil, fmt.Errorf("Chromium-Rendering fehlgeschlagen: %w", runErr)
+		return nil, fmt.Errorf("chromium rendering failed: %w", runErr)
 	}
 
 	return pdfData, nil

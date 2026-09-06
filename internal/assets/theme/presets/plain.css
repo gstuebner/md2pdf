@@ -1,0 +1,65 @@
+/* Preset "plain" — almost unstyled. Greyscale only, no accent colour, no
+   fills, no badges, no figure numbers. Meant for drafts and as a clean base to
+   put your own --css on top of. */
+
+:root {
+  /* Accent — deliberately just dark grey */
+  --accent:        #333333;
+  --accent-strong: #222222;
+  --accent-soft:   #f2f2f2;
+
+  /* Text */
+  --ink:        #111111;
+  --ink-2:      #333333;
+  --ink-muted:  #555555;
+  --ink-faint:  #888888;
+
+  /* Surfaces and rules */
+  --page:        #ffffff;
+  --surface:     #fafafa;
+  --surface-2:   #f2f2f2;
+  --rule:        #dddddd;
+  --rule-strong: #bbbbbb;
+
+  /* Callouts: outline only, no fill */
+  --note-line:      #666666;  --note-bg:      transparent;  --note-edge:      #cccccc;
+  --tip-line:       #666666;  --tip-bg:       transparent;  --tip-edge:       #cccccc;
+  --important-line: #666666;  --important-bg: transparent;  --important-edge: #cccccc;
+  --warning-line:   #444444;  --warning-bg:   transparent;  --warning-edge:   #bbbbbb;
+  --caution-line:   #222222;  --caution-bg:   transparent;  --caution-edge:   #aaaaaa;
+
+  /* Typography */
+  --font-body: "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "JetBrains Mono", Consolas, "DejaVu Sans Mono", monospace;
+  --size-body: 10.5pt;
+  --leading:   1.55;
+
+  --h1-size: 18pt;
+  --h2-size: 14pt;
+  --h3-size: 12pt;
+  --h4-size: 11pt;
+
+  /* Vertical rhythm */
+  --space:   7pt;
+  --space-2: 14pt;
+  --space-3: 20pt;
+
+  --radius: 0;
+}
+
+/* No coloured heading numbers */
+body.numbered .doc h2::before,
+body.numbered .toc-l2 > a::before { color: var(--ink-2); }
+
+/* Tables: header rule only */
+.doc th { background: none; border-bottom: 1pt solid var(--rule-strong); }
+.doc td { border-bottom: 0.5pt solid var(--rule); }
+.doc table :is(th, td):first-child { padding-left: 0; }
+.doc table :is(th, td):last-child  { padding-right: 0; }
+
+/* Code without a fill */
+.doc code { background: none; border: 0; padding: 0; }
+.codeblock { background: none; border: 0.5pt solid var(--rule); }
+
+/* Figures without a frame and without a number */
+.figure img { border: 0; }

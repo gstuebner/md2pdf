@@ -1,0 +1,90 @@
+/* Preset "report" — a business or expert report: serif body text, sans-serif
+   headings, generous margins, quiet tables, no chapter numbers. */
+
+:root {
+  /* Accent */
+  --accent:        #1f3a5f;
+  --accent-strong: #16304f;
+  --accent-soft:   #eef2f7;
+
+  /* Text */
+  --ink:        #1c1c1c;
+  --ink-2:      #33383d;
+  --ink-muted:  #5a6068;
+  --ink-faint:  #98a0a8;
+
+  /* Surfaces and rules */
+  --page:        #ffffff;
+  --surface:     #f7f8f9;
+  --surface-2:   #f0f2f4;
+  --rule:        #dcdfe3;
+  --rule-strong: #bcc2c9;
+
+  /* Callouts: bar / fill / outline */
+  --note-line:      #1f3a5f;  --note-bg:      #f1f4f8;  --note-edge:      #c8d3e0;
+  --tip-line:       #26654a;  --tip-bg:       #f0f6f3;  --tip-edge:       #c2ddd0;
+  --important-line: #4c3a76;  --important-bg: #f4f2f9;  --important-edge: #d0c8e4;
+  --warning-line:   #8a5a00;  --warning-bg:   #fbf6ea;  --warning-edge:   #e6d3a8;
+  --caution-line:   #9e2b26;  --caution-bg:   #faf0ef;  --caution-edge:   #e5c1be;
+
+  /* Typography */
+  --font-body:    "Source Serif 4", Georgia, "Times New Roman", "DejaVu Serif", serif;
+  --font-heading: "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --font-mono:    "JetBrains Mono", Consolas, "DejaVu Sans Mono", monospace;
+  --size-body: 11pt;
+  --leading:   1.6;
+
+  --h1-size: 20pt;
+  --h2-size: 15pt;
+  --h3-size: 12pt;
+  --h4-size: 11pt;
+
+  /* Vertical rhythm */
+  --space:   9pt;
+  --space-2: 18pt;
+  --space-3: 28pt;
+
+  --radius: 2pt;
+}
+
+/* Headings and display type stay sans-serif */
+.doc h1, .doc h2, .doc h3, .doc h4, .doc h5, .doc h6,
+.cover-title, .cover-subtitle, .cover-kicker, .cover-meta,
+.toc-heading, .toc-list a {
+  font-family: var(--font-heading);
+}
+
+.doc h2 {
+  padding-bottom: 4pt;
+  border-bottom: 0.75pt solid var(--rule-strong);
+}
+
+/* Quiet tables: hairlines only, no fills */
+.doc th {
+  background: none;
+  border-bottom: 1pt solid var(--rule-strong);
+  font-family: var(--font-heading);
+  font-size: 9pt;
+  letter-spacing: 0.02em;
+}
+.doc td { border-bottom: 0.5pt solid var(--rule); }
+.doc table :is(th, td):first-child { padding-left: 0; }
+.doc table :is(th, td):last-child  { padding-right: 0; }
+
+/* Figures without a frame, captions numbered and centred under the image */
+.figure img { border: 0; }
+.figure figcaption { text-align: center; font-family: var(--font-heading); }
+.figure figcaption::before {
+  content: var(--label-figure) " " counter(figure) ": ";
+  font-weight: 620;
+  color: var(--ink-2);
+}
+
+/* A pull quote should read like a quotation, not like a note */
+.doc blockquote {
+  padding-left: 20pt;
+  border-left: 1.5pt solid var(--accent);
+  color: var(--ink-2);
+}
+
+.doc a { text-decoration-thickness: 0.04em; }

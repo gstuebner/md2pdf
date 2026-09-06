@@ -13,18 +13,7 @@ import (
 
 // ErrBrowserNotFound is returned by Find when no usable Chromium-based
 // browser could be located by any of the lookup strategies.
-var ErrBrowserNotFound = errors.New("keine Chromium-basierte Browser-Engine gefunden")
-
-// NotFoundHelp is a multi-line, user-facing help message explaining how to
-// install a supported browser or point md2pdf at one explicitly. Callers are
-// responsible for printing it; this package never writes to stderr itself.
-const NotFoundHelp = `md2pdf: keine Chromium-basierte Browser-Engine gefunden.
-
-Installiere eine davon oder gib den Pfad explizit an:
-  Arch/CachyOS:  paru -S chromium
-  Debian/Ubuntu: sudo apt install chromium
-  Windows:       Microsoft Edge ist vorinstalliert
-  manuell:       md2pdf --browser-path /pfad/zu/chrome`
+var ErrBrowserNotFound = errors.New("no Chromium-based browser engine found")
 
 // candidateNames are executables looked up via exec.LookPath, in order.
 var candidateNames = []string{
@@ -76,13 +65,13 @@ func Find(explicitPath string) (string, error) {
 func checkExecutable(path string) (string, error) {
 	info, err := os.Stat(path)
 	if err != nil {
-		return "", fmt.Errorf("Browser-Pfad %q nicht nutzbar: %w", path, ErrBrowserNotFound)
+		return "", fmt.Errorf("browser path %q cannot be used: %w", path, ErrBrowserNotFound)
 	}
 	if info.IsDir() {
-		return "", fmt.Errorf("Browser-Pfad %q ist ein Verzeichnis: %w", path, ErrBrowserNotFound)
+		return "", fmt.Errorf("browser path %q is a directory: %w", path, ErrBrowserNotFound)
 	}
 	if runtime.GOOS != "windows" && info.Mode()&0111 == 0 {
-		return "", fmt.Errorf("Browser-Pfad %q ist nicht ausführbar: %w", path, ErrBrowserNotFound)
+		return "", fmt.Errorf("browser path %q is not executable: %w", path, ErrBrowserNotFound)
 	}
 	return path, nil
 }

@@ -31,13 +31,13 @@ var (
 )
 
 // BrowserNotFoundHelp is printed to stderr when ErrBrowserNotFound occurs.
-const BrowserNotFoundHelp = `md2pdf: keine Chromium-basierte Browser-Engine gefunden.
+const BrowserNotFoundHelp = `md2pdf: no Chromium-based browser engine found.
 
-Installiere eine davon oder gib den Pfad explizit an:
+Install one of these, or point md2pdf at an existing binary:
   Arch/CachyOS:  paru -S chromium
   Debian/Ubuntu: sudo apt install chromium
-  Windows:       Microsoft Edge ist vorinstalliert
-  manuell:       md2pdf --browser-path /pfad/zu/chrome`
+  Windows:       Microsoft Edge is preinstalled
+  manually:      md2pdf --browser-path /path/to/chrome`
 
 // Run converts the Markdown file described by o into a PDF.
 func Run(ctx context.Context, o config.Options) (Result, error) {

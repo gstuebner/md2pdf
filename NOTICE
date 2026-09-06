@@ -6,6 +6,11 @@ Inter
   internal/assets/fonts/OFL-Inter.txt
   https://github.com/rsms/inter
 
+Source Serif 4
+  SIL Open Font License 1.1
+  internal/assets/fonts/OFL-SourceSerif4.txt
+  https://github.com/adobe-fonts/source-serif
+
 JetBrains Mono
   SIL Open Font License 1.1
   internal/assets/fonts/OFL-JetBrainsMono.txt

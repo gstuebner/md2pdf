@@ -12,6 +12,9 @@ technical descriptions — documents with a cover page, table of contents,
 numbered chapters, tables, and code examples that ultimately ship to users
 as a PDF.
 
+Six built-in **style presets** cover the common document types, so getting a
+presentable PDF needs no CSS of your own — see [Presets](#presets).
+
 ## Requirements
 
 md2pdf doesn't bundle its own Chromium; instead it looks for an already
@@ -98,6 +101,56 @@ destination:
 md2pdf handbuch.md -o /tmp/out.pdf
 ```
 
+To pick a different look:
+
+```fish
+md2pdf handbuch.md --preset technical
+md2pdf handbuch.md -p t              # the same, abbreviated
+```
+
+## Presets
+
+A preset bundles a stylesheet with the structural defaults that go with it —
+whether the document gets a cover page and a table of contents, whether
+chapters are numbered, and which page margins are used. `md2pdf
+--list-presets` prints the names with a one-line description:
+
+| Preset      | Look                                                                 | Cover | Contents | Numbering | Margins             |
+| ----------- | -------------------------------------------------------------------- | ----- | -------- | --------- | ------------------- |
+| `classic`   | plain office document: dark blue rule under the title, hairline under each chapter, fully bordered tables | no  | no          | no  | `20mm`                |
+| `modern`    | the original md2pdf look: accent bar next to each chapter, language badges on code blocks, numbered figures | yes | yes (3)     | yes | `25mm 20mm 20mm 20mm` |
+| `technical` | dense manual: smaller type, emphasised code blocks, one chapter per page | yes | yes (4)     | yes | `25mm 20mm 20mm 20mm` |
+| `report`    | business report: Source Serif body text, sans-serif headings, quiet tables | yes | yes (2)     | no  | `30mm 25mm 25mm 25mm` |
+| `plain`     | greyscale and almost unstyled, a base for your own `--css`            | no    | no          | no  | `20mm`                |
+| `handout`   | landscape handout: large type, one chapter per page                   | no    | no          | no  | `18mm`                |
+
+`classic` is the default. The old default look is `--preset modern`.
+
+The flag has the short form `-p`, and an unambiguous prefix of the name is
+enough — every preset is reachable by its first letter, so `-p c`, `-p m`,
+`-p t`, `-p r`, `-p p` and `-p h` all work.
+
+A preset only fills in what you left alone — every flag on the command line
+wins over it:
+
+```fish
+md2pdf handbuch.md --preset classic --toc-depth 3   # classic, but with contents
+md2pdf handbuch.md --preset handout --landscape=false
+```
+
+A document can also name its preset itself, which `--preset` still overrides:
+
+```markdown
+---
+title: Aurora Desk
+preset: technical
+---
+```
+
+Presets and `--css` combine: the `--css` files load last and override the
+preset, so a preset plus a handful of overridden custom properties is usually
+enough for corporate branding.
+
 ## Frontmatter
 
 Metadata lives in a YAML frontmatter block at the top of the Markdown file.
@@ -108,13 +161,14 @@ Metadata precedence below).
 | ---------- | -------------------------------------------------------------------------- |
 | `title`    | Document title on the cover page. If missing, the document's first H1 heading is used instead and removed from the body text. |
 | `subtitle` | Subtitle shown under the title on the cover page.                          |
-| `kicker`   | Short line above the title, e.g. a document category. Defaults to `Dokumentation`. |
+| `kicker`   | Short line above the title, e.g. a document category. Defaults to `Documentation` (`Dokumentation` when the document language is German). |
 | `version`  | Document version (not md2pdf's own program version); appears on the cover page and in the header. |
 | `author`   | Author, appears on the cover page.                                         |
 | `company`  | Publisher/company, appears on the cover page and, if set, in the footer.   |
-| `date`     | Display form of the date, e.g. `05.09.2026`. If missing, today's date is inserted in this format. |
+| `date`     | Display form of the date, e.g. `2026-09-05`. If missing, today's date is inserted (`YYYY-MM-DD`, or `DD.MM.YYYY` when the document language is German). |
 | `logo`     | Path to an image file, relative to the Markdown file, for the cover page. |
-| `lang`     | Language of the generated text snippets (callout titles, „Seite/von", table-of-contents title). Defaults to `de`, also supports `en`. |
+| `lang`     | Language of the generated text snippets (callout titles, "Page/of", table-of-contents heading, figure captions). Supports `de` and `en`; without it md2pdf uses the locale from `LC_ALL`/`LANG` and falls back to `en`. |
+| `preset`   | Style preset for this document, see [Presets](#presets). `--preset` overrides it. |
 
 Example (based on `testdata/showcase.md`):
 
@@ -128,6 +182,7 @@ author: Dokumentationsteam
 company: Beispiel GmbH
 date: 05.09.2026
 lang: de
+preset: modern
 ---
 
 # Aurora Desk
@@ -150,18 +205,20 @@ lang: de
 | `--company`              | empty                           | Overrides the publisher from the frontmatter.                      |
 | `--date`                 | empty                           | Overrides the date from the frontmatter.                           |
 | `--logo`                 | empty                           | Overrides the logo path from the frontmatter.                      |
-| `--lang`                 | empty (behaves like `de`)       | Language of the labels (`de` or `en`): callout titles, table-of-contents heading, footer words. Overrides the frontmatter. |
-| `--no-toc`               | `false`                        | No table of contents.                                              |
-| `--toc-depth`            | `3`                            | Depth of the table of contents (heading levels).                   |
-| `--no-cover`             | `false`                        | No cover page.                                                     |
-| `--no-numbering`         | `false`                        | No chapter numbers.                                                |
+| `--lang`                 | locale, else `en`               | Language of the labels (`de` or `en`): callout titles, table-of-contents heading, figure captions, footer words. Overrides the frontmatter. |
+| `-p, --preset`           | `classic`                       | Style preset, see [Presets](#presets). An unambiguous prefix is enough (`-p c`). Overrides a `preset` in the frontmatter. |
+| `--list-presets`         | `false`                         | Lists the built-in presets with a one-line description and exits.  |
+| `--no-toc`               | preset                          | No table of contents.                                              |
+| `--toc-depth`            | preset                          | Depth of the table of contents (heading levels). Naming a depth implies a table of contents; `--no-toc` still wins. |
+| `--no-cover`             | preset                          | No cover page.                                                     |
+| `--no-numbering`         | preset                          | No chapter numbers.                                                |
 | `--force-numbering`      | `false`                        | Numbers chapters even when md2pdf has detected the document's own chapter numbers. |
-| `--chapter-pages`        | `false`                        | Each chapter (H2) starts on a new page.                             |
+| `--chapter-pages`        | preset                          | Each chapter (H2) starts on a new page.                             |
 | `--paper`                | `A4`                           | Paper size: `A4`, `A5`, `Letter`, or `Legal`.                       |
-| `--landscape`            | `false`                        | Landscape orientation.                                              |
-| `--margin`               | `25mm 20mm 20mm 20mm`          | Page margins: 1 value (all sides), 2 values (vertical horizontal), or 4 values (top right bottom left); units `mm`, `cm`, `in`, `pt` (no unit: `mm`). |
-| `--no-header`            | `false`                        | No running header.                                                  |
-| `--no-footer`            | `false`                        | No footer (which also removes page numbers).                       |
+| `--landscape`            | preset                          | Landscape orientation.                                              |
+| `--margin`               | preset                          | Page margins: 1 value (all sides), 2 values (vertical horizontal), or 4 values (top right bottom left); units `mm`, `cm`, `in`, `pt` (no unit: `mm`). |
+| `--no-header`            | preset                          | No running header.                                                  |
+| `--no-footer`            | preset                          | No footer (which also removes page numbers).                       |
 | `--header-template`      | empty                           | Custom Chromium header template (file).                            |
 | `--footer-template`      | empty                           | Custom Chromium footer template (file).                            |
 | `--browser-path`         | empty                           | Explicit path to the browser engine (see Requirements).            |
@@ -172,7 +229,10 @@ lang: de
 | `-q, --quiet`            | `false`                        | No success message on stdout.                                      |
 | `-v, --version`          | `false`                        | Prints the program version and exits.                              |
 
-Metadata precedence: CLI flag > frontmatter > built-in default.
+Metadata precedence: CLI flag > frontmatter > built-in default. The same
+holds for the preset and for the structural options a preset carries: CLI
+flag > preset (`--preset`, else `preset:` in the frontmatter, else
+`classic`).
 
 ## Supported Markdown
 
@@ -186,16 +246,50 @@ Three features go beyond plain GFM:
 - **GitHub alerts** (`> [!NOTE] …`) become colored callout boxes with an
   icon. Supported: `NOTE`, `TIP`, `IMPORTANT`, `WARNING`, and `CAUTION`.
 - A **paragraph that consists of nothing but an image** automatically
-  becomes a numbered figure with a caption („Abbildung 1: …"). The image's
+  becomes a numbered figure with a caption ("Figure 1: …", "Abbildung 1: …"
+  in German). Not every preset numbers figures — `classic` and `plain` leave
+  the caption plain. The image's
   title (`![Alt](bild.png "Titel")`) is used as the caption; if no title is
   set, the alt text is used instead. If both are empty, the caption is
   omitted, but the figure stays numbered.
 - ` ```mermaid ` code blocks are rendered as vector graphics rather than as
-  text.
+  text. Mermaid is bundled, so this works offline:
+
+  ````markdown
+  ```mermaid
+  flowchart LR
+      B[Browser] --> G[API-Gateway]
+      G --> A[Booking service]
+      G --> I[Inventory service]
+      A --> D[(PostgreSQL)]
+      I --> D
+      A --> Q[/Notifications/]
+  ```
+  ````
+
+  Sequence diagrams work the same way:
+
+  ````markdown
+  ```mermaid
+  sequenceDiagram
+      participant U as User
+      participant G as Gateway
+      participant B as Booking service
+      U->>G: POST /api/v1/bookings
+      G->>B: create booking
+      B-->>G: 201 Created
+      G-->>U: confirmation
+  ```
+  ````
+
+  The diagram picks up the preset's colours (`--accent`, `--ink`, `--rule`),
+  so it fits the rest of the document. `testdata/showcase.md` contains both
+  examples in context.
 
 ## Chapter numbering
 
-By default, md2pdf numbers chapters itself: H2 becomes `1`, `2`, `3`, H3
+Where the preset switches numbering on (`modern`, `technical`), md2pdf
+numbers chapters itself: H2 becomes `1`, `2`, `3`, H3
 becomes `1.1`, `1.2`, and so on, both in the body text and in the table of
 contents.
 
@@ -216,18 +310,19 @@ numbering off, `--force-numbering` always turns it on.
 
 ## Custom branding
 
-The bundled theme defines all colors, font sizes, and spacing as CSS custom
+Each preset defines all colors, font sizes, and spacing as CSS custom
 properties on `:root` (e.g., `--accent`, `--ink`, `--font-body`,
-`--size-body`). A `--css` file loads after the theme and can simply
+`--size-body`). A `--css` file loads after the preset and can simply
 override these variables without having to rebuild the rules themselves:
 
 ```fish
-md2pdf handbuch.md --css eigenes-branding.css
+md2pdf handbuch.md --preset modern --css eigenes-branding.css
 ```
 
-A complete example lives at `design/branding-example.css`. A static
-preview of every supported Markdown element in the default theme lives at
-`design/preview.html` and opens directly in a browser.
+A complete example lives at `design/branding-example.css`. A static preview
+of every supported Markdown element lives at `design/preview.html`, opens
+directly in a browser, and can switch between presets in the top right
+corner.
 
 ## Known limitations
 

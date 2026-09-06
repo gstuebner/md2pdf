@@ -44,6 +44,9 @@ func TestFlagMappingDefaults(t *testing.T) {
 	want := config.DefaultOptions()
 	want.Input = "input.md"
 	want.Output = "input.pdf"
+	// Without --toc-depth the preset decides the depth, so the CLI leaves it
+	// at zero for pipeline.Run to fill in.
+	want.TOCDepth = 0
 
 	if !reflect.DeepEqual(o, want) {
 		t.Fatalf("options mismatch:\n got: %+v\nwant: %+v", o, want)
