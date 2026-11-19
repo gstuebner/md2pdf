@@ -257,6 +257,10 @@ Durchstreichen, automatische Verlinkung von URLs), dazu Definitionslisten,
 Fußnoten und typografische Ersetzungen (z. B. gerade Anführungszeichen zu
 typografischen, `--` zu Gedankenstrich).
 
+Überschriften-Anker folgen dem Schema von GitHub: Umlaute und andere
+Buchstaben bleiben erhalten (`## Überblick` bekommt die id `überblick`),
+Verweise wie `[Text](#überblick)` funktionieren also wie auf GitHub.
+
 Drei Besonderheiten gehen über reines GFM hinaus:
 
 - **GitHub-Alerts** (`> [!NOTE] …`) werden zu farbigen Hinweisboxen mit Icon.
@@ -394,6 +398,10 @@ Wer ein Deckblatt ohne Kopf-/Fußzeile braucht, hat zwei Auswege:
   Kopf- bzw. Fußzeile (damit auch auf dem Deckblatt).
 - Ein eigenes `--header-template`/`--footer-template` kann inhaltlich leer
   gestaltet werden, erscheint aber weiterhin als leerer Rand auf jeder Seite.
+
+Enthält eine Überschrift einen Link, bleibt dessen Ziel im Anker stehen:
+`## [Link](ziel) im Titel` ergibt `linkziel-im-titel`, GitHub dagegen
+`link-im-titel`.
 
 ## Exit-Codes
 

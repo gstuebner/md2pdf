@@ -251,6 +251,10 @@ strikethrough, automatic URL linking), plus definition lists, footnotes,
 and typographic substitutions (e.g., straight quotes become curly quotes,
 `--` becomes a dash).
 
+Heading anchors follow GitHub's scheme: umlauts and other letters are kept
+(`## Überblick` gets the id `überblick`), so links such as
+`[Text](#überblick)` written for GitHub work in the PDF as well.
+
 Three features go beyond plain GFM:
 
 - **GitHub alerts** (`> [!NOTE] …`) become colored callout boxes with an
@@ -387,6 +391,10 @@ workarounds:
   document (including the cover page).
 - A custom `--header-template`/`--footer-template` can be made visually
   empty, but it still shows up as blank margin space on every page.
+
+A heading that contains a link keeps the link target in its anchor:
+`## [Link](target) in title` gets `linktarget-in-title`, whereas GitHub
+uses `link-in-title`.
 
 ## Exit codes
 

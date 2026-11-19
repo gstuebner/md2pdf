@@ -77,7 +77,7 @@ func Convert(src []byte, o Options) (Result, error) {
 		goldmark.WithRendererOptions(html.WithUnsafe()),
 	)
 
-	pc := parser.NewContext()
+	pc := parser.NewContext(parser.WithIDs(newHeadingIDs()))
 	root := md.Parser().Parse(text.NewReader(src), parser.WithContext(pc))
 	doc, ok := root.(*ast.Document)
 	if !ok {
