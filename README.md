@@ -87,11 +87,11 @@ editing it and tagging the commit. `md2pdf --version` and the last line of
 `md2pdf --help` then report it:
 
 ```
-md2pdf 1.1.2 · Gregor Stübner & Claude (Anthropic)
+md2pdf 1.1.3 · Gregor Stübner & Claude (Anthropic)
 ```
 
 A plain `go build .` bypasses the linker flag and falls back to the module
-version the Go toolchain recorded (`go install …@v1.1.2`), or to `dev` when
+version the Go toolchain recorded (`go install …@v1.1.3`), or to `dev` when
 there is none.
 
 Other targets: `make test` (Go tests), `make vet` (`go vet`), `make fmt`
